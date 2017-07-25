@@ -1,7 +1,7 @@
 const UserController = require('../controllers/users_controller');
 const MovieController = require('../controllers/movie_controller');
 const uploadController = require('../controllers/upload_controller');
-
+const SubscriptionController = require('../controllers/subscription_controller');
 
 const fs = require('fs');
 const path = require('path');
@@ -45,13 +45,8 @@ module.exports = (app) => {
     app.get('/api/users/:id', requireAuth, UserController.getUser);
     app.put('/api/users/:id', requireAuth, UserController.editUser);
     app.delete('/api/users/:id', requireAuth, UserController.removeUser);
-    app.post('/api/subscribe', requireAuth, UserController.subscribe);
+    //app.post('/api/subscribe', requireAuth, UserController.subscribe);
 
-
-
-    app.get('/api/protected', requireAuth, function(req, res) {
-        res.send({ authenticated: true });
-    });
 
     //TODO
     ///* requireAuth, UserController.roleAuthorization(['moderator']),*/
@@ -61,18 +56,6 @@ module.exports = (app) => {
     app.post('/api/movies/create', requireAuth, MovieController.createMovie);
     app.put('/api/movies/:id', requireAuth, MovieController.updateMovie);
     app.delete('/api/movies/:id', requireAuth, MovieController.deleteMovie);
-
-
-
-    app.del('/api/upload/del/:id', function(req, res) {
-        const id = req.params.id;
-        fs.unlink(path.join('./server/uploads/', id), function(error) {
-            if (error) {
-                throw error;
-            }
-            console.log('Deleted' + id);
-        });
-    });
 
     const uploadToFTP = (filename, res, obj) => {
         const c = new Client();
@@ -111,12 +94,9 @@ module.exports = (app) => {
         }
     });
 
-    /*app.get('/api/uploads/:id', function(req, res) {
-        console.log(req.params);
-        const storedMimeType = 'image/jpeg';
-        res.setHeader('Content-Type', storedMimeType);
-        if (req.params.id != 'undefined') {
-            fs.createReadStream(path.join('./server/uploads/', req.params.id).replace(/\.[^/.]+$/, "")).pipe(res);
-        }
-    });*/
+    app.get('/api/subscribe', SubscriptionController.getSubscriptions);
+    app.post('/api/subscribe', SubscriptionController.subscribe);
+    app.delete('/api/subscribe/:id', SubscriptionController.unsubscribe);
+
+
 };
