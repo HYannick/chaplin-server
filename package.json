@@ -1,0 +1,38 @@
+{
+    "name": "chap",
+    "version": "1.0.0",
+    "description": "chap app",
+    "main": "index.js",
+    "scripts": {
+        "start-dev": "nf start -p 4000",
+        "start": "set NODE_ENV=production&& node index.js",
+        "all": "concurrently \" npm run back\" \"npm run front\"",
+        "front": "cd ../sheep-chap && npm run dev",
+        "back": "set NODE_ENV=development&& nodemon index.js",
+        "test": "set NODE_ENV=test&& nodemon --exec mocha --recursive -R min"
+    },
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "bcrypt-nodejs": "0.0.3",
+        "body-parser": "^1.17.1",
+        "concurrently": "^3.5.0",
+        "cors": "^2.8.3",
+        "cross-env": "^5.0.1",
+        "express": "^4.15.2",
+        "foreman": "^2.0.0",
+        "jwt-simple": "^0.5.1",
+        "mocha": "^3.2.0",
+        "moment": "^2.18.1",
+        "mongoose": "^4.9.5",
+        "morgan": "^1.8.1",
+        "multer": "^1.3.0",
+        "nodemon": "^1.11.0",
+        "passport": "^0.3.2",
+        "passport-jwt": "^2.2.1",
+        "passport-local": "^1.0.0",
+        "pug": "^2.0.0-rc.2",
+        "supertest": "^3.0.0",
+        "vue-datepicker": "^1.3.0"
+    }
+}

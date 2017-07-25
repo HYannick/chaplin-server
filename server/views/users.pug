@@ -1,0 +1,16 @@
+html
+    head
+    body
+        each user in users
+            div.user
+                a(href="/api/users/"+user._id) #{user.email}
+                ul
+                    each sub in user.subscriptions
+                        li
+                            div
+                                p #{sub.title}
+                                ul
+                                    each vol in sub.volunteers
+                                        li
+                                            a(href="/api/users/"+vol._id) #{vol.email}
+                p #{user.role}
