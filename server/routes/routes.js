@@ -2,6 +2,24 @@ const UserController = require('../controllers/users_controller');
 const MovieController = require('../controllers/movie_controller');
 const uploadController = require('../controllers/upload_controller');
 
+
+const fs = require('fs');
+const path = require('path');
+
+const passport = require('passport');
+const passportService = require('../config/passport');
+
+const requireAuth = passport.authenticate('jwt', { session: false });
+const requireSignin = passport.authenticate('local', { session: false });
+const isProd = process.env.NODE_ENV === 'production';
+
+const Client = require('ftp');
+const ftpOptions = {
+    host: 'ftp.cluster020.hosting.ovh.net',
+    user: 'ayhofrzkyz',
+    password: 'aFSxhvAr7gp3',
+    port: '21'
+};
 const multer = require('multer');
 const storage = multer.diskStorage({
     destination: function(req, file, cb) {
@@ -15,14 +33,7 @@ const storage = multer.diskStorage({
         }
 
     }
-})
-const fs = require('fs');
-const path = require('path');
-const passport = require('passport');
-const passportService = require('../config/passport');
-
-const requireAuth = passport.authenticate('jwt', { session: false });
-const requireSignin = passport.authenticate('local', { session: false });
+});
 
 module.exports = (app) => {
     app.get('/api', UserController.greeting);
@@ -62,14 +73,32 @@ module.exports = (app) => {
             console.log('Deleted' + id);
         });
     });
+
+    const uploadToFTP = (filename, res, obj) => {
+        const c = new Client();
+        c.connect(ftpOptions);
+        c.on('ready', function() {
+            c.list(function(err, list) {
+                c.put(path.join('./server/uploads/', filename), `./www/uploads/${filename}`, function(err) {
+                    console.log('done');
+                    if (err) throw err;
+                    c.end();
+                    res.json(obj);
+                });
+            });
+        });
+    }
     app.post('/api/upload/cover', multer({ storage }).array('cover'), function(req, res) {
-        console.log(req.files);
-        res.json({ 'cover': req.files });
+        const { filename } = req.files[0];
+        obj = { 'cover': req.files };
+        (isProd) ? uploadToFTP(filename, res, obj): res.json(obj);
+
     });
 
     app.post('/api/upload/images', multer({ storage }).array('images'), function(req, res) {
-        console.log(req.files);
-        res.json({ 'images': req.files });
+        const { filename } = req.files[0];
+        obj = { 'images': req.files };
+        (isProd) ? uploadToFTP(filename, res, obj): res.json(obj);
     });
 
 
