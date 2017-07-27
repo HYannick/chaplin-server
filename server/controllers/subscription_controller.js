@@ -14,20 +14,43 @@ module.exports = {
         const getMovie = Movie.findOne({ _id: movieId });
         const getUser = User.findOne({ _id: userId });
 
-        Subscription.create(req.body)
+        const createSub = Subscription.create(req.body)
             .then(() => Subscription.find({})
-                .then((err, subs) => {
-                    if (err) { res.send(err) }
+                .then((subs) => {
+                    console.log(subs)
                     res.json(subs);
-                }));
+                })).catch(err => res.status(500).send(err));
+
+
+
+        Promise.all([getMovie, getUser, createSub])
+            .then(results => {
+                const movie = results[0];
+                const user = results[1];
+                const createSubs = results[2];
+
+                const { enrolled } = user;
+                const { volunteers } = movie;
+
+                enrolled.push(movie);
+                volunteers.push(user);
+                return Promise.all([user.save(), movie.save()]);
+
+            })
+            .then(() => getUser)
+            .then(user => {
+                return res.json(user);
+            }).catch(err => {
+                return res.status(500).send(err);
+            });
     },
     unsubscribe(req, res, next) {
         Subscription.remove({
                 _id: req.params.id
             })
             .then(() => Subscription.find({})
-                .then((err, subs) => {
-                    if (err) { res.send(err) }
+                .then((subs) => {
+
                     res.json(subs);
                 }));
     }

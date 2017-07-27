@@ -28,7 +28,7 @@ const MovieSchema = new Schema({
     },
     volunteers: [{
         type: Schema.Types.ObjectId,
-        ref: 'user'
+        ref: 'subs'
     }]
 });
 

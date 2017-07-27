@@ -23,9 +23,9 @@ const userSchema = new Schema({
         enum: ['reader', 'volunteer', 'moderator', 'admin'],
         default: 'reader'
     },
-    subscriptions: [{
+    enrolled: [{
         type: Schema.Types.ObjectId,
-        ref: 'movie'
+        ref: 'subs'
     }]
 });
 
