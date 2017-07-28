@@ -20,7 +20,13 @@ module.exports = {
     },
     getMovies(req, res, next) {
         Movie.find({})
-            .populate('volunteers')
+            .populate({
+                path: 'subscriptions',
+                populate: {
+                    path: 'volunteers',
+                    model: 'user'
+                }
+            })
             .then((err, movies) => {
                 if (err) { res.send(err) }
                 res.json(movies);
@@ -28,7 +34,13 @@ module.exports = {
     },
     getDiffusedMovies(req, res, next) {
         Movie.find({ 'diffused': true })
-            .populate('volunteers')
+            .populate({
+                path: 'subscriptions',
+                populate: {
+                    path: 'volunteers',
+                    model: 'user'
+                }
+            })
             .then((err, movies) => {
                 if (err) { res.send(err) }
                 res.json(movies);

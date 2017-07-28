@@ -13,7 +13,8 @@ function setUserInfo(request) {
     return {
         _id: request._id,
         email: request.email,
-        role: request.role
+        role: request.role,
+        username: request.username
     };
 }
 
@@ -41,6 +42,7 @@ module.exports = {
         const email = req.body.email;
         const password = req.body.password;
         const role = req.body.role;
+        const username = req.body.username;
 
         if (!email || !password) {
             return res.status(422).send({ error: 'You must provide an email and password' })
@@ -53,10 +55,18 @@ module.exports = {
             }
         });
 
+        User.findOne({ username: username }, function(err, existingUser) {
+            if (err) { return next(err) }
+            if (existingUser) {
+                return res.status(422).send({ error: 'Username is in use' });
+            }
+        });
+
         const user = new User({
             email: email,
             password: password,
-            role: role
+            role: role,
+            username: username
         });
 
         user.save(function(err, user) {
