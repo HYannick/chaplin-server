@@ -3,8 +3,11 @@ const Schema = mongoose.Schema;
 const SubscriptionSchema = new Schema({
     date: String,
     time: String,
-    userId: Schema.ObjectId,
-    movieId: [{
+    enrolled: [{
+        type: Schema.Types.ObjectId,
+        ref: 'user'
+    }],
+    movies: [{
         type: Schema.Types.ObjectId,
         ref: 'movie'
     }]

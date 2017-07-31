@@ -94,7 +94,10 @@ module.exports = (app) => {
         }
     });
 
-    app.get('/api/subscribe', SubscriptionController.getSubscriptions);
+    app.get('/api/subscriptions', SubscriptionController.getSubscriptions);
+    app.get('/api/movie/:id/subscription?', SubscriptionController.getMovieSubscription);
+    app.get('/api/movie/:id/subscriptions', SubscriptionController.getMovieSubscriptions);
+    app.get('/api/user/:id/subscriptions', SubscriptionController.getUserSubscriptions);
     app.post('/api/subscribe', SubscriptionController.subscribe);
     app.delete('/api/subscribe/:id', SubscriptionController.unsubscribe);
 
