@@ -1,6 +1,5 @@
 const UserController = require('../controllers/users_controller');
 const MovieController = require('../controllers/movie_controller');
-const uploadController = require('../controllers/upload_controller');
 const SubscriptionController = require('../controllers/subscription_controller');
 
 const fs = require('fs');
@@ -52,6 +51,7 @@ module.exports = (app) => {
     ///* requireAuth, UserController.roleAuthorization(['moderator']),*/
     app.get('/api/movies', MovieController.getMovies);
     app.get('/api/movies/popular', MovieController.getDiffusedMovies);
+    app.get('/api/movies/upcoming', MovieController.getUpcomingMovies);
     app.get('/api/movies/:id', MovieController.getMovie);
     app.post('/api/movies/create', requireAuth, MovieController.createMovie);
     app.put('/api/movies/:id', requireAuth, MovieController.updateMovie);

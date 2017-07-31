@@ -48,6 +48,20 @@ module.exports = {
                 res.json(movies);
             });
     },
+    getUpcomingMovies(req, res, next) {
+        Movie.find({ 'upcoming': true })
+            .populate({
+                path: 'subscriptions',
+                populate: {
+                    path: 'volunteers',
+                    model: 'user'
+                }
+            })
+            .then((err, movies) => {
+                if (err) { res.send(err) }
+                res.json(movies);
+            });
+    },
     createMovie(req, res, next) {
         const {
             title,
