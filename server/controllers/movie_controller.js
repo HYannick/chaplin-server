@@ -21,10 +21,12 @@ module.exports = {
     getMovies(req, res, next) {
         Movie.find({})
             .populate({
-                path: 'subscriptions',
+                path: 'volunteers',
+                model: 'subs',
                 populate: {
-                    path: 'volunteers',
+                    path: 'enrolled',
                     model: 'user'
+
                 }
             })
             .then((err, movies) => {

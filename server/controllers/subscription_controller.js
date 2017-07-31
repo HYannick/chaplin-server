@@ -65,41 +65,61 @@ module.exports = {
             });
     },
     subscribe(req, res, next) {
-        const { enrolled, movies, time, date } = req.body;
-        Subscription.find({
-                time: time,
-                date: date,
-                movies: { '_id': movies }
-            })
-            .then((sub) => {
-                if (sub.length === 0) {
-                    Subscription.create(req.body)
-                        .then(() => Subscription.find({})
-                            .then((subs) => {
-                                res.json(subs);
-                            })).catch(err => res.status(500).send(err));
-                } else {
-                    const isEnrolled = sub[0].enrolled;
-                    if (isEnrolled.length !== 0) {
-                        if (isEnrolled.indexOf(enrolled) !== -1) {
-                            isEnrolled.splice(isEnrolled.indexOf(enrolled), 1);
-                            sub[0].save().then(() => Subscription.find({})
-                                .then(subs => res.json(subs)));
-                        } else {
-                            throw 'Someone already subscribed at this time. Too late!'
-                        }
 
+        const { date, time, userId, movieId } = req.body;
+
+        const getMovie = Movie.find({ _id: movieId })
+        const getUser = User.find({ '_id': userId });
+        const getSubscriptions = Subscription.find({});
+
+
+        Promise.all([getMovie, getUser])
+            .then(results => {
+                const movie = results[0];
+                const user = results[1];
+
+                const { enrolled } = user[0];
+                const { volunteers } = movie[0];
+
+                Subscription.find({
+                    time: time,
+                    date: date,
+                    movies: { '_id': movieId }
+                }).then(sub => {
+
+                    if (sub.length === 0) {
+                        Subscription.create({
+                            date,
+                            time,
+                            movies: movieId,
+                            enrolled: userId
+                        }).then(sub => {
+                            enrolled.push(sub);
+                            volunteers.push(sub);
+                            return Promise.all([user[0].save(), movie[0].save()])
+                        })
                     } else {
-                        isEnrolled.push(enrolled);
-                        sub[0].save().then(() => Subscription.find({})
-                            .then(subs => res.json(subs)));
+                        const isEnrolled = sub[0].enrolled;
+                        if (isEnrolled.length !== 0) {
+                            if (isEnrolled.indexOf(userId) !== -1) {
+                                Subscription.remove({ '_id': sub[0]._id }).then(() => {
+                                    enrolled.splice(enrolled.indexOf(sub[0]._id), 1);
+                                    volunteers.splice(volunteers.indexOf(sub[0]._id), 1);
+                                    return Promise.all([user[0].save(), movie[0].save()])
+                                })
+                            } else {
+                                return res.status(500).send({ error: 'Someone already subscribed at this time. Too late!' });
+                            }
+                        }
                     }
-                }
-
+                });
             })
-            .catch(err => {
-                res.json({ err })
-            })
+            .then(() => getSubscriptions)
+            .then(subs => {
+                return res.json(subs);
+            }).catch(err => {
+                return res.status(500).send(err);
+            });
     },
     unsubscribe(req, res, next) {
         Subscription.remove({
