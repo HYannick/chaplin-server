@@ -1,4 +1,5 @@
 const Movie = require('../models/movie');
+const Proposal = require('../models/proposal');
 const multer = require('multer');
 
 module.exports = {
@@ -63,38 +64,7 @@ module.exports = {
             });
     },
     createMovie(req, res, next) {
-        const {
-            title,
-            synopsis,
-            cover,
-            language,
-            checkList,
-            imageSet,
-            duration,
-            actors,
-            genres,
-            desc,
-            dates,
-            authors,
-            trailer,
-            year,
-        } = req.body;
-        Movie.create({
-                title,
-                synopsis,
-                cover,
-                language,
-                checkList,
-                imageSet,
-                duration,
-                actors,
-                genres,
-                desc,
-                dates,
-                authors,
-                trailer,
-                year,
-            })
+        Movie.create(req.body)
             .then(() => Movie.find({})
                 .then((err, movies) => {
                     if (err) { res.send(err) }
@@ -121,5 +91,49 @@ module.exports = {
                     if (err) { res.send(err) }
                     res.json(movies);
                 }));
-    }
+    },
+
+    getProposal(req, res, next) {
+        Proposal.find({})
+            .populate({
+                path: 'submitter',
+                model: 'user'
+            })
+            .then((proposals) => {
+                res.json(proposals);
+            }).catch(err => res.json(err));
+    },
+
+    postProposal(req, res, next) {
+        Proposal.create(req.body)
+            .then(() => Proposal.find({})
+                .then((err, proposals) => {
+                    if (err) res.send(err)
+                    res.json(proposals);
+                }));
+    },
+    likeProposal(req, res, next) {
+        const { id } = req.params;
+        const { userId } = req.body;
+        console.log(userId)
+        Proposal.findById({ _id: id }).then(proposal => {
+            const { likes } = proposal;
+            if (likes.indexOf(userId) !== -1) {
+                likes.splice(likes.indexOf(userId), 1);
+            } else {
+                likes.push(userId);
+            }
+            proposal.save().then(() => res.json({ success: 'You liked it!' }));
+        });
+    },
+    deleteProposal(req, res, next) {
+        Proposal.remove({
+                _id: req.params.id
+            })
+            .then(() => Proposal.find({})
+                .then((err, proposals) => {
+                    if (err) { res.send(err) }
+                    res.json(proposals);
+                }));
+    },
 };

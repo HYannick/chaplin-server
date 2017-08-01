@@ -43,9 +43,7 @@ module.exports = (app) => {
     app.get('/api/users', requireAuth, UserController.getUsers);
     app.get('/api/users/:id', requireAuth, UserController.getUser);
     app.put('/api/users/:id/edit', requireAuth, UserController.editUser);
-    app.delete('/api/users/:id', requireAuth, UserController.removeUser);
-    //app.post('/api/subscribe', requireAuth, UserController.subscribe);
-
+    app.delete('/api/users/:id', UserController.removeUser);
 
     //TODO
     ///* requireAuth, UserController.roleAuthorization(['moderator']),*/
@@ -54,6 +52,12 @@ module.exports = (app) => {
     app.get('/api/movies/upcoming', MovieController.getUpcomingMovies);
     app.get('/api/movies/:id', MovieController.getMovie);
     app.post('/api/movies/create', requireAuth, MovieController.createMovie);
+
+    app.get('/api/proposals', MovieController.getProposal);
+    app.post('/api/proposals', requireAuth, MovieController.postProposal);
+    app.delete('/api/proposals/:id', requireAuth, MovieController.deleteProposal);
+    app.put('/api/proposals/:id', MovieController.likeProposal);
+
     app.put('/api/movies/:id', requireAuth, MovieController.updateMovie);
     app.delete('/api/movies/:id', requireAuth, MovieController.deleteMovie);
 
@@ -70,7 +74,8 @@ module.exports = (app) => {
                 });
             });
         });
-    }
+    };
+
     app.post('/api/upload/cover', multer({ storage }).array('cover'), function(req, res) {
         const { filename } = req.files[0];
         obj = { 'cover': req.files };

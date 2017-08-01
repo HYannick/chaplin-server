@@ -29,7 +29,8 @@ const MovieSchema = new Schema({
     volunteers: [{
         type: Schema.Types.ObjectId,
         ref: 'subs'
-    }]
+    }],
+    rate: Number
 });
 
 const Movie = mongoose.model('movie', MovieSchema);
