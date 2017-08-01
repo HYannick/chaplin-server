@@ -115,7 +115,6 @@ module.exports = {
     likeProposal(req, res, next) {
         const { id } = req.params;
         const { userId } = req.body;
-        console.log(userId)
         Proposal.findById({ _id: id }).then(proposal => {
             const { likes } = proposal;
             if (likes.indexOf(userId) !== -1) {
