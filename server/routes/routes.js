@@ -42,7 +42,7 @@ module.exports = (app) => {
 
     app.get('/api/users', requireAuth, UserController.getUsers);
     app.get('/api/users/:id', requireAuth, UserController.getUser);
-    app.put('/api/users/:id', requireAuth, UserController.editUser);
+    app.put('/api/users/:id/edit', requireAuth, UserController.editUser);
     app.delete('/api/users/:id', requireAuth, UserController.removeUser);
     //app.post('/api/subscribe', requireAuth, UserController.subscribe);
 
