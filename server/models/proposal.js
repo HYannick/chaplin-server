@@ -10,6 +10,7 @@ const ProposalSchema = new Schema({
         ref: 'user'
     }],
     cover: String,
+    url: String,
     submitter: {
         type: Schema.Types.ObjectId,
         ref: 'user'
