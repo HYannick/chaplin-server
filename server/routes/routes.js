@@ -1,6 +1,7 @@
 const UserController = require('../controllers/users_controller');
 const MovieController = require('../controllers/movie_controller');
 const SubscriptionController = require('../controllers/subscription_controller');
+const imgProc = require('../controllers/upload_controller');
 
 const fs = require('fs');
 const path = require('path');
@@ -20,19 +21,28 @@ const ftpOptions = {
     port: '21'
 };
 const multer = require('multer');
-const storage = multer.diskStorage({
-    destination: function(req, file, cb) {
-        cb(null, './server/uploads')
-    },
-    filename: function(req, file, cb) {
-        console.log(file.mimetype)
-        console.log(file.originalname)
-        if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
-            cb(null, file.originalname);
-        }
 
-    }
-});
+const myCustomStorage = require('../controllers/upload_controller');
+
+const storage = myCustomStorage({
+        destination: function(req, file, cb) {
+            cb(null, './server/uploads/' + file.originalname)
+        }
+    })
+    /*const storage = multer.diskStorage({
+        destination: function(req, file, cb) {
+            cb(null, './server/uploads')
+        },
+        filename: function(req, file, cb) {
+            console.log(file.mimetype)
+            console.log(file.originalname)
+            if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
+                console.log('uploading')
+                    //cb(null, file.originalname);
+            }
+
+        }
+    });*/
 
 module.exports = (app) => {
     app.get('/api', UserController.greeting);
@@ -76,11 +86,16 @@ module.exports = (app) => {
         });
     };
 
-    app.post('/api/upload/cover', multer({ storage }).array('cover'), function(req, res) {
+    /*app.post('/api/upload/cover', multer({ storage }).array('cover'), function(req, res) {
         const { filename } = req.files[0];
         obj = { 'cover': req.files };
         (isProd) ? uploadToFTP(filename, res, obj): res.json(obj);
 
+    });*/
+
+    app.post('/api/upload/cover', multer({ storage }).array('cover'), (req, res, next) => {
+        const { filename } = req.files[0];
+        console.log(filename)
     });
 
     app.post('/api/upload/images', multer({ storage }).array('images'), function(req, res) {

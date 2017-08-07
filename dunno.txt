@@ -1,0 +1,76 @@
+<!-- Macro for 1 slide -->
+{% macro render(social, big, double, image) %}
+{% set bkgGradient = 'linear-gradient(90deg, rgba(0,30,79,0.6), rgba(0,30,79,0.6))' %}
+<li class="
+      dgad-social-wall__element
+      {% if big %}
+        dgad-social-wall__element--big
+      {% endif %}
+      {% if big and double %}
+        dgad-social-wall__element--double
+      {% endif %}
+      {% if image and double == false %}
+        dgad-social-wall__element--image
+      {% endif %}"
+    {% if image and double == false %}
+    style="background-color: #fce500"
+    {% endif %}>
+    <a href="{{ social.originalSource }}" target="_blank" class="socialwall-link">
+        <div class="socialwall-link__cover" {% if image and double == false %}
+             style="background-image: {{ bkgGradient }}, url({{ social.images.normal }})"
+        "{% endif %}></div>
+        <figure class="socialwall-link__icon" data-social-type="{{ social.source }}">
+            <div class="social__type">
+                {% set socialType = ["twitter","instagram","facebook","youtube"] %}
+                {% set regExp = r/michelin/gi %}
+                {% set isMichelin = regExp.exec(social.source) %}
+                {% set inSocialType = socialType.indexOf(social.source) !== -1 %}
+                {% if inSocialType %}
+                {% set iconpath =  ['apostrophe-templates:svg/', social.source  | replace(":", ""), '.svg'] | join %}
+                {% elseif isMichelin.length !== null %}
+                {% set iconpath =  ['apostrophe-templates:svg/', "michelin"  | replace(":", ""), '.svg'] | join %}
+                {% else %}
+                {% set iconpath =  ['apostrophe-templates:svg/', "rss"  | replace(":", ""), '.svg'] | join %}
+                {% endif %}
+                {% include iconpath ignore missing %}
+            </div>
+        </figure>
+        {% if big and double %}
+        <div class="socialwall-link__left">
+            <div class="socialwall-link__left--cover" style="background-image: url({{ social.images.normal }})"></div>
+            <p class="read-more__button">Read more</p>
+        </div>
+        <div class="socialwall-link__right">
+            <div class="socialwall-link__right__arrow"></div>
+            <p href="#" class="socialwall-link__author">
+                @{{ social.user.username }}
+            </p>
+            <bloquote class="socialwall-link__big-quote">
+                {{ social.caption | truncate(50) }}
+            </bloquote>
+        </div>
+        {% else %}
+        <bloquote class="socialwall-link__quote">
+            {{ social.caption | truncate(50)}}
+        </bloquote>
+        <p href="#" class="socialwall-link__author">
+            @{{ social.user.username }}
+        </p>
+        {% for tag in social.tags %}
+        {% if loop.length > 0 %}
+        {% if loop.first %}
+        <ul class="socialwall-link__tags">
+            {% endif %}
+            <li>
+                <p href="#" class="socialwall-link__tags__tag">#{{ tag }}</p>
+            </li>
+            {% if loop.last %}
+        </ul>
+        {% endif %}
+        {% endif %}
+        {% endfor %}
+        <p class="read-more__button">Read more</p>
+        {% endif %}
+    </a>
+</li>
+{% endmacro %}
