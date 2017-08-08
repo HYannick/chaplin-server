@@ -15,7 +15,7 @@ const isProd = process.env.NODE_ENV === 'production';
 const apiUrls = require('../config/apiUrls');
 const multer = require('multer');
 
-const myCustomStorage = require('../controllers/upload_controller');
+const nodemailer = require('nodemailer');
 
 
 const storage = multer.diskStorage({
@@ -29,6 +29,18 @@ const storage = multer.diskStorage({
         }
     }
 });
+
+function processImages(req, res, obj) {
+    const { filename } = req.files[0];
+    Jimp.read(path.join(`${apiUrls.uploads}/` + filename)).then(function(image) {
+        image
+            .quality(60) // set JPEG quality
+            .write(path.join(`${apiUrls.uploads}/` + filename)); // save
+        (isProd) ? uploadController.uploadToFTP(filename, res, obj): res.json(obj);
+    }).catch(function(err) {
+        console.error(err);
+    });
+}
 
 module.exports = (app) => {
     app.get('/api', UserController.greeting);
@@ -57,26 +69,55 @@ module.exports = (app) => {
     app.put('/api/movies/:id', requireAuth, MovieController.updateMovie);
     app.delete('/api/movies/:id', requireAuth, MovieController.deleteMovie);
 
-
-
-
-    function processImages(req, res, obj) {
-        const { filename } = req.files[0];
-        Jimp.read(path.join(`${apiUrls.uploads}/` + filename)).then(function(image) {
-            image
-                .quality(60) // set JPEG quality
-                .write(path.join(`${apiUrls.uploads}/` + filename)); // save
-            (isProd) ? uploadController.uploadToFTP(filename, res, obj): res.json(obj);
-        }).catch(function(err) {
-            console.error(err);
-        });
-    }
     app.post('/api/upload/cover', multer({ storage }).array('cover'), function(req, res) {
         const obj = { 'cover': req.files }
         processImages(req, res, obj)
 
 
     });
+
+    app.get('/api/subscriptions', SubscriptionController.getSubscriptions);
+    app.get('/api/movie/:id/subscription?', SubscriptionController.getMovieSubscription);
+    app.get('/api/movie/:id/subscriptions', SubscriptionController.getMovieSubscriptions);
+    app.get('/api/user/:id/subscriptions', SubscriptionController.getUserSubscriptions);
+    app.post('/api/subscribe', SubscriptionController.subscribe);
+    app.delete('/api/subscribe/:id', SubscriptionController.unsubscribe);
+
+
+    const xoauth2 = require('xoauth2')
+    var transporter = nodemailer.createTransport({
+        service: "Gmail",
+        port: 465,
+        secure: true,
+        auth: {
+
+            type: 'Oauth2',
+            user: 'qu0rragun@gmail.com',
+            clientId: '915104744507-43se8cbpu5937ea1k50gj2l3cn0iaogr.apps.googleusercontent.com',
+            clientSecret: '4zVzCj3nIgDPaSVAJmkx6QxR',
+            refreshToken: '1/MK0O5V-bXHUr7dmCcpvCFMNHjvsVwmiL9-8i7OL3En8'
+
+        }
+    });
+
+    const mailOptions = {
+            from: 'qu0rragun@gmail.com',
+            //to: 'yoshimath@gmail.com',
+            subject: 'Gngn',
+            html: 'Je t\'aime <3!'
+        }
+        //Upload part
+    app.get('/api/sendmail', function(req, res, next) {
+        /*transporter.sendMail(mailOptions, function(error, info) {
+            if (error) {
+                console.log(error);
+            } else {
+                console.log('Email sent: ' + info.response);
+                res.json({ success: 'successfully sent!' })
+            }
+        });*/
+    });
+
     app.post('/api/upload/images', multer({ storage }).array('images'), function(req, res) {
         const obj = { 'images': req.files }
         processImages(req, res, obj)
@@ -103,13 +144,4 @@ module.exports = (app) => {
             }).pipe(res);
         }
     });
-
-    app.get('/api/subscriptions', SubscriptionController.getSubscriptions);
-    app.get('/api/movie/:id/subscription?', SubscriptionController.getMovieSubscription);
-    app.get('/api/movie/:id/subscriptions', SubscriptionController.getMovieSubscriptions);
-    app.get('/api/user/:id/subscriptions', SubscriptionController.getUserSubscriptions);
-    app.post('/api/subscribe', SubscriptionController.subscribe);
-    app.delete('/api/subscribe/:id', SubscriptionController.unsubscribe);
-
-
 };
