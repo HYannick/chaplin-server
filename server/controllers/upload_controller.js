@@ -6,6 +6,7 @@ function getDestination(req, file, cb) {
 
 function MyCustomStorage(opts) {
     this.getDestination = (opts.destination || getDestination)
+    this.compressFiles = (opts.compressFile)
 }
 
 MyCustomStorage.prototype._handleFile = function _handleFile(req, file, cb) {
@@ -22,7 +23,11 @@ MyCustomStorage.prototype._handleFile = function _handleFile(req, file, cb) {
                 size: outStream.bytesWritten
             })
         })
-    })
+    });
+
+    this.compressFiles(req, file, function(err, path) {
+
+    });
 }
 
 MyCustomStorage.prototype._removeFile = function _removeFile(req, file, cb) {

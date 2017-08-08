@@ -5,7 +5,7 @@ const imgProc = require('../controllers/upload_controller');
 
 const fs = require('fs');
 const path = require('path');
-
+const Jimp = require("jimp");
 const passport = require('passport');
 const passportService = require('../config/passport');
 
@@ -24,25 +24,18 @@ const multer = require('multer');
 
 const myCustomStorage = require('../controllers/upload_controller');
 
-const storage = myCustomStorage({
-        destination: function(req, file, cb) {
-            cb(null, './server/uploads/' + file.originalname)
-        }
-    })
-    /*const storage = multer.diskStorage({
-        destination: function(req, file, cb) {
-            cb(null, './server/uploads')
-        },
-        filename: function(req, file, cb) {
-            console.log(file.mimetype)
-            console.log(file.originalname)
-            if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
-                console.log('uploading')
-                    //cb(null, file.originalname);
-            }
 
+const storage = multer.diskStorage({
+    destination: function(req, file, cb) {
+        cb(null, './server/uploads')
+    },
+    filename: function(req, file, cb) {
+        console.log(file);
+        if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
+            cb(null, file.originalname);
         }
-    });*/
+    }
+});
 
 module.exports = (app) => {
     app.get('/api', UserController.greeting);
@@ -80,28 +73,45 @@ module.exports = (app) => {
                     console.log('done');
                     if (err) throw err;
                     c.end();
-                    res.json(obj);
+                    fs.readdir('./server/uploads', function(req, files) {
+                        if (files.length > 10) {
+                            fs.unlink(path.join('./server/uploads/', filename), function(err) {
+                                if (err) throw err;
+                                res.json(obj);
+                            });
+                        } else {
+                            res.json(obj);
+                        }
+                    })
+
                 });
             });
         });
     };
+    fs.readdir('./server/uploads', function(req, files) {
+        console.log(files.length)
+    })
 
-    /*app.post('/api/upload/cover', multer({ storage }).array('cover'), function(req, res) {
+    function processImages(req, res, obj) {
         const { filename } = req.files[0];
-        obj = { 'cover': req.files };
-        (isProd) ? uploadToFTP(filename, res, obj): res.json(obj);
+        Jimp.read(path.join('./server/uploads/' + filename)).then(function(image) {
+            image
+                .quality(60) // set JPEG quality
+                .write(path.join('./server/uploads/' + filename)); // save
+            (isProd) ? uploadToFTP(filename, res, obj): res.json(obj);
+        }).catch(function(err) {
+            console.error(err);
+        });
+    }
+    app.post('/api/upload/cover', multer({ storage }).array('cover'), function(req, res) {
+        const obj = { 'cover': req.files }
+        processImages(req, res, obj)
 
-    });*/
 
-    app.post('/api/upload/cover', multer({ storage }).array('cover'), (req, res, next) => {
-        const { filename } = req.files[0];
-        console.log(filename)
     });
-
     app.post('/api/upload/images', multer({ storage }).array('images'), function(req, res) {
-        const { filename } = req.files[0];
-        obj = { 'images': req.files };
-        (isProd) ? uploadToFTP(filename, res, obj): res.json(obj);
+        const obj = { 'images': req.files }
+        processImages(req, res, obj)
     });
 
 
