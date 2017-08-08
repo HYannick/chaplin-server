@@ -1,7 +1,7 @@
 const UserController = require('../controllers/users_controller');
 const MovieController = require('../controllers/movie_controller');
 const SubscriptionController = require('../controllers/subscription_controller');
-const imgProc = require('../controllers/upload_controller');
+const uploadController = require('../controllers/upload_controller');
 
 const fs = require('fs');
 const path = require('path');
@@ -12,14 +12,7 @@ const passportService = require('../config/passport');
 const requireAuth = passport.authenticate('jwt', { session: false });
 const requireSignin = passport.authenticate('local', { session: false });
 const isProd = process.env.NODE_ENV === 'production';
-
-const Client = require('ftp');
-const ftpOptions = {
-    host: 'ftp.cluster020.hosting.ovh.net',
-    user: 'ayhofrzkyz',
-    password: 'aFSxhvAr7gp3',
-    port: '21'
-};
+const apiUrls = require('../config/apiUrls');
 const multer = require('multer');
 
 const myCustomStorage = require('../controllers/upload_controller');
@@ -27,7 +20,7 @@ const myCustomStorage = require('../controllers/upload_controller');
 
 const storage = multer.diskStorage({
     destination: function(req, file, cb) {
-        cb(null, './server/uploads')
+        cb(null, apiUrls.uploads)
     },
     filename: function(req, file, cb) {
         console.log(file);
@@ -64,41 +57,16 @@ module.exports = (app) => {
     app.put('/api/movies/:id', requireAuth, MovieController.updateMovie);
     app.delete('/api/movies/:id', requireAuth, MovieController.deleteMovie);
 
-    const uploadToFTP = (filename, res, obj) => {
-        const c = new Client();
-        c.connect(ftpOptions);
-        c.on('ready', function() {
-            c.list(function(err, list) {
-                c.put(path.join('./server/uploads/', filename), `./www/uploads/${filename}`, function(err) {
-                    console.log('done');
-                    if (err) throw err;
-                    c.end();
-                    fs.readdir('./server/uploads', function(req, files) {
-                        if (files.length > 10) {
-                            fs.unlink(path.join('./server/uploads/', filename), function(err) {
-                                if (err) throw err;
-                                res.json(obj);
-                            });
-                        } else {
-                            res.json(obj);
-                        }
-                    })
 
-                });
-            });
-        });
-    };
-    fs.readdir('./server/uploads', function(req, files) {
-        console.log(files.length)
-    })
+
 
     function processImages(req, res, obj) {
         const { filename } = req.files[0];
-        Jimp.read(path.join('./server/uploads/' + filename)).then(function(image) {
+        Jimp.read(path.join(`${apiUrls.uploads}/` + filename)).then(function(image) {
             image
                 .quality(60) // set JPEG quality
-                .write(path.join('./server/uploads/' + filename)); // save
-            (isProd) ? uploadToFTP(filename, res, obj): res.json(obj);
+                .write(path.join(`${apiUrls.uploads}/` + filename)); // save
+            (isProd) ? uploadController.uploadToFTP(filename, res, obj): res.json(obj);
         }).catch(function(err) {
             console.error(err);
         });
@@ -114,11 +82,23 @@ module.exports = (app) => {
         processImages(req, res, obj)
     });
 
+    app.delete('/api/uploads/:id', function(req, res, next) {
+        const { id } = req.params;
+        if (isProd) {
+            uploadController.deleteFromFTP(res, id);
+        } else {
+            fs.unlink(path.join(`${apiUrls.uploads}/`, id), function(err) {
+                if (err) throw err;
+                res.json({ success: 'file deleted' });
+            });
+        }
+    });
+
 
     app.get('/api/uploads/:id', function(req, res) {
         if (req.params.id != 'undefined') {
-            fs.createReadStream(path.join('./server/uploads/', req.params.id)).on('error', function(e) {
-                console.log('errori', e);
+            fs.createReadStream(path.join(`${apiUrls.uploads}/`, req.params.id)).on('error', function(e) {
+                console.log('error', e);
                 fs.createReadStream(path.join('./server/static/404.png')).pipe(res)
             }).pipe(res);
         }

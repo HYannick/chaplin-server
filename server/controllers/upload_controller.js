@@ -1,39 +1,58 @@
-var fs = require('fs')
+const fs = require('fs');
+const Client = require('ftp');
+const path = require('path');
+const apiUrls = require('../config/apiUrls');
+const ftpOptions = {
+    host: 'ftp.cluster020.hosting.ovh.net',
+    user: 'ayhofrzkyz',
+    password: 'aFSxhvAr7gp3',
+    port: '21'
+};
+module.exports = {
+    uploadToFTP(filename, res, obj) {
+        const c = new Client();
+        c.connect(ftpOptions);
+        c.on('ready', function() {
+            c.list(function(err, list) {
+                c.put(path.join(`${apiUrls.uploads}/`, filename), `${apiUrls.ftp}/${filename}`, function(err) {
+                    console.log('done');
+                    if (err) throw err;
+                    c.end();
+                    fs.readdir(apiUrls.uploads, function(req, files) {
+                        if (files.length > 10) {
+                            fs.unlink(path.join(`${apiUrls.uploads}/`, filename), function(err) {
+                                if (err) throw err;
+                                res.json(obj);
+                            });
+                        } else {
+                            res.json(obj);
+                        }
+                    })
 
-function getDestination(req, file, cb) {
-    cb(null, '/dev/null')
-}
+                });
+            });
+        });
+    },
 
-function MyCustomStorage(opts) {
-    this.getDestination = (opts.destination || getDestination)
-    this.compressFiles = (opts.compressFile)
-}
-
-MyCustomStorage.prototype._handleFile = function _handleFile(req, file, cb) {
-    this.getDestination(req, file, function(err, path) {
-        if (err) return cb(err)
-
-        var outStream = fs.createWriteStream(path)
-        console.log(path)
-        file.stream.pipe(outStream)
-        outStream.on('error', cb)
-        outStream.on('finish', function() {
-            cb(null, {
-                path: path,
-                size: outStream.bytesWritten
-            })
-        })
-    });
-
-    this.compressFiles(req, file, function(err, path) {
-
-    });
-}
-
-MyCustomStorage.prototype._removeFile = function _removeFile(req, file, cb) {
-    fs.unlink(file.path, cb)
-}
-
-module.exports = function(opts) {
-    return new MyCustomStorage(opts)
+    deleteFromFTP(res, filename) {
+        const c = new Client();
+        c.connect(ftpOptions);
+        c.on('ready', function() {
+            c.list(function(err, list) {
+                c.delete(`${apiUrls.ftp}/${filename}`, function(err) {
+                    console.log('deleted');
+                    if (err) throw err;
+                    c.end();
+                    fs.readdir(apiUrls.uploads, function(req, files) {
+                        if (files.indexOf(filename) !== -1) {
+                            fs.unlink(path.join(`${apiUrls.uploads}/`, filename), function(err) {
+                                if (err) throw err;
+                                res.json({ success: 'file deleted' });
+                            });
+                        }
+                    });
+                });
+            });
+        });
+    }
 }
