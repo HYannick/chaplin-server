@@ -19,7 +19,6 @@ module.exports = {
     },
     getMovieSubscriptions(req, res, next) {
         const { id } = req.params;
-        console.log(id)
         Subscription.find({
                 movies: { '_id': id },
             })
@@ -35,7 +34,6 @@ module.exports = {
     getMovieSubscription(req, res, next) {
         const { id } = req.params;
         const { date, time } = req.query;
-        console.log(date, time);
         Subscription.find({
                 movies: { '_id': id },
                 date: date,

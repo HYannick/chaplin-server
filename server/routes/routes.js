@@ -30,11 +30,11 @@ const storage = multer.diskStorage({
     }
 });
 
-function processImages(req, res, obj) {
+function processImages(req, res, obj, rendering) {
     const { filename } = req.files[0];
     Jimp.read(path.join(`${apiUrls.uploads}/` + filename)).then(function(image) {
         image
-            .quality(60) // set JPEG quality
+            .quality(rendering) // set JPEG quality
             .write(path.join(`${apiUrls.uploads}/` + filename)); // save
         (isProd) ? uploadController.uploadToFTP(filename, res, obj): res.json(obj);
     }).catch(function(err) {
@@ -71,7 +71,7 @@ module.exports = (app) => {
 
     app.post('/api/upload/cover', multer({ storage }).array('cover'), function(req, res) {
         const obj = { 'cover': req.files }
-        processImages(req, res, obj)
+        processImages(req, res, obj, 60)
 
 
     });
@@ -120,7 +120,7 @@ module.exports = (app) => {
 
     app.post('/api/upload/images', multer({ storage }).array('images'), function(req, res) {
         const obj = { 'images': req.files }
-        processImages(req, res, obj)
+        processImages(req, res, obj, 80)
     });
 
     app.delete('/api/uploads/:id', function(req, res, next) {
