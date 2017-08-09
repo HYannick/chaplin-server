@@ -1,14 +1,26 @@
 const fs = require('fs');
 const Client = require('ftp');
 const path = require('path');
-const apiUrls = require('../config/apiUrls');
-const ftpOptions = {
-    host: 'ftp.cluster020.hosting.ovh.net',
-    user: 'ayhofrzkyz',
-    password: 'aFSxhvAr7gp3',
-    port: '21'
-};
-module.exports = {
+const ftpOptions = require('../config/ftp');
+const apiUrls = require('../config/upload_urls');
+const multer = require('multer');
+const Jimp = require("jimp");
+const isProd = process.env.NODE_ENV === 'production';
+
+const uploadProcess = {
+
+    processImages(req, res, obj, rendering) {
+        const { filename } = req.files[0];
+        Jimp.read(path.join(`${apiUrls.uploads}/` + filename)).then(function(image) {
+            image
+                .quality(rendering) // set JPEG quality
+                .write(path.join(`${apiUrls.uploads}/` + filename)); // save
+            (isProd) ? uploadProcess.uploadToFTP(filename, res, obj): res.json(obj);
+        }).catch(function(err) {
+            console.error(err);
+        });
+    },
+
     uploadToFTP(filename, res, obj) {
         const c = new Client();
         c.connect(ftpOptions);
@@ -49,10 +61,45 @@ module.exports = {
                                 if (err) throw err;
                                 res.json({ success: 'file deleted' });
                             });
+                        } else {
+                            res.json({ success: 'file deleted' });
                         }
                     });
                 });
             });
         });
+    },
+
+    uploadCover(req, res) {
+        const obj = { 'cover': req.files }
+        uploadProcess.processImages(req, res, obj, 60)
+    },
+
+    uploadImageSet(req, res) {
+        const obj = { 'images': req.files }
+        uploadProcess.processImages(req, res, obj, 80)
+    },
+
+    deleteImages(req, res, next) {
+        const { id } = req.params;
+        console.log('deleting')
+        if (isProd) {
+            uploadProcess.deleteFromFTP(res, id);
+        } else {
+            fs.unlink(path.join(`${apiUrls.uploads}/`, id), function(err) {
+                if (err) throw err;
+                res.json({ success: 'file deleted' });
+            });
+        }
+    },
+
+    viewImage(req, res) {
+        if (req.params.id != 'undefined') {
+            fs.createReadStream(path.join(`${apiUrls.uploads}/`, req.params.id)).on('error', function(e) {
+                console.log('error', e);
+                fs.createReadStream(path.join('./server/static/404.png')).pipe(res)
+            }).pipe(res);
+        }
     }
 }
+module.exports = uploadProcess;
