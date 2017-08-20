@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 const MovieSchema = new Schema({
     title: {
         type: String,
-        required: true
+        required: true,
     },
     synopsis: String,
     cover: String,
@@ -32,7 +32,10 @@ const MovieSchema = new Schema({
     }],
     rate: Number
 });
-
 const Movie = mongoose.model('movie', MovieSchema);
+
+
+
+
 
 module.exports = Movie;

@@ -19,7 +19,7 @@ if (process.env.NODE_ENV === 'production') {
     mongoose.connect(dbConf.prod);
 }
 if (process.env.NODE_ENV === 'development') {
-    mongoose.connect(dbConf.dev);
+    mongoose.connect(dbConf.dev, { config: { autoIndex: false } });
 }
 
 app.set('view engine', 'pug');

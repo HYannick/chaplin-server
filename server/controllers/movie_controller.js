@@ -19,6 +19,14 @@ module.exports = {
                 res.json(movie);
             });
     },
+    getMovieByTitle(req, res, next) {
+        const { title } = req.query;
+        console.log(title)
+        Movie.find({ $text: { $search: title } })
+            .then(movie => {
+                res.json(movie);
+            });
+    },
     getMovies(req, res, next) {
         Movie.find({})
             .populate({

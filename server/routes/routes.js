@@ -51,6 +51,7 @@ module.exports = (app) => {
 
     // Movie Control
     app.get('/api/movies', MovieController.getMovies);
+    app.get('/api/movies/search?', MovieController.getMovieByTitle);
     app.get('/api/movies/popular', MovieController.getDiffusedMovies);
     app.get('/api/movies/upcoming', MovieController.getUpcomingMovies);
     app.get('/api/movies/:id', MovieController.getMovie);
@@ -72,6 +73,7 @@ module.exports = (app) => {
     app.get('/api/user/:id/subscriptions', SubscriptionController.getUserSubscriptions);
     app.post('/api/subscribe', SubscriptionController.subscribe);
     app.delete('/api/subscribe/:id', SubscriptionController.unsubscribe);
+    app.post('/api/subscriptions/delete', SubscriptionController.deleteSubscriptions);
 
     // Email Control
     app.post('/api/sendmail', EmailController.sendEmail);

@@ -125,7 +125,18 @@ module.exports = {
             })
             .then(() => Subscription.find({})
                 .then((subs) => {
+                    res.json(subs);
+                }));
+    },
 
+    deleteSubscriptions(req, res, next) {
+        const { legacySubs } = req.body;
+        console.log(legacySubs)
+        Subscription.remove({
+                _id: { '$in': legacySubs }
+            })
+            .then(() => Subscription.find({})
+                .then((subs) => {
                     res.json(subs);
                 }));
     }
