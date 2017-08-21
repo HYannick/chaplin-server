@@ -93,6 +93,43 @@ const uploadProcess = {
         }
     },
 
+    //this is a tricky one...XD
+    // CF : https://stackoverflow.com/questions/14295878/delete-several-files-in-node-js
+    deleteFromRequest(files, callback) {
+        var i = files.length;
+        files.forEach(function(filepath) {
+            if (isProd) {
+                const c = new Client();
+                c.connect(ftpOptions);
+                c.on('ready', function() {
+                    c.list(function(err, list) {
+                        c.delete(`${apiUrls.ftp}/${filepath}`, function(err) {
+                            console.log('deleted');
+                            i--;
+                            c.end();
+                            if (err) {
+                                callback(err);
+                                return;
+                            } else if (i <= 0) {
+                                callback(null);
+                            }
+                        });
+                    });
+                });
+            } else {
+                fs.unlink(path.join(`${apiUrls.uploads}/`, filepath), function(err) {
+                    i--;
+                    if (err) {
+                        callback(err);
+                        return;
+                    } else if (i <= 0) {
+                        callback(null);
+                    }
+                });
+            }
+        });
+    },
+
     viewImage(req, res) {
         if (req.params.id != 'undefined') {
             fs.createReadStream(path.join(`${apiUrls.uploads}/`, req.params.id)).on('error', function(e) {

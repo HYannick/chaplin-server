@@ -1,6 +1,8 @@
 const Movie = require('../models/movie');
+const User = require('../models/user');
 const Proposal = require('../models/proposal');
-const multer = require('multer');
+const Subscription = require('../models/subscriptions');
+const uploadCtrl = require('./upload_controller');
 
 module.exports = {
     getMovie(req, res, next) {
@@ -80,14 +82,31 @@ module.exports = {
                 }));
     },
     deleteMovie(req, res, next) {
-        Movie.remove({
-                _id: req.params.id
-            })
-            .then(() => Movie.find({})
-                .then((err, movies) => {
-                    if (err) { res.send(err) }
-                    res.json(movies);
-                }));
+        const { id } = req.params;
+        Subscription.find({ movies: { '_id': id } })
+            .then((subs) => {
+                legacy = subs.map((sub) => sub._id);
+                User.update({}, { $pull: { enrolled: { $in: legacy } } }, { multi: true }).then(() => {
+                    Subscription.remove({
+                        movies: { '_id': id }
+                    }).then(() => {
+                        Movie.findOne({ '_id': id }).then(movie => {
+                            movie.imageSet.push(movie.cover)
+                            uploadCtrl.deleteFromRequest(movie.imageSet, function(err) {
+                                if (err) {
+                                    console.log(err);
+                                } else {
+                                    Movie.remove({
+                                            _id: req.params.id
+                                        })
+                                        .then(() => res.json({ success: 'film deleted' }));
+                                }
+                            })
+                        })
+
+                    })
+                })
+            });
     },
     updateMovie(req, res, next) {
         const movieId = req.params.id;
