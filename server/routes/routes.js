@@ -51,9 +51,10 @@ module.exports = (app) => {
 
     // Movie Control
     app.get('/api/movies', MovieController.getMovies);
-    app.get('/api/movies/search?', MovieController.getMovieByTitle);
+    app.get('/api/movies/search', MovieController.getMovieByTitle);
     app.get('/api/movies/popular', MovieController.getDiffusedMovies);
     app.get('/api/movies/upcoming', MovieController.getUpcomingMovies);
+    app.get('/api/movies/:id/related', MovieController.getRelatedMovies);
     app.get('/api/movies/:id', MovieController.getMovie);
     app.post('/api/movies/create', requireAuth, MovieController.createMovie);
     app.put('/api/movies/:id', requireAuth, MovieController.updateMovie);
@@ -68,7 +69,7 @@ module.exports = (app) => {
 
     // Subscription Control
     app.get('/api/subscriptions', SubscriptionController.getSubscriptions);
-    app.get('/api/movie/:id/subscription?', SubscriptionController.getMovieSubscription);
+    app.get('/api/movie/:id/subscription', SubscriptionController.getMovieSubscription);
     app.get('/api/movie/:id/subscriptions', SubscriptionController.getMovieSubscriptions);
     app.get('/api/user/:id/subscriptions', SubscriptionController.getUserSubscriptions);
     app.post('/api/subscribe', SubscriptionController.subscribe);

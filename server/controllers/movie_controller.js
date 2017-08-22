@@ -54,8 +54,7 @@ module.exports = {
                     model: 'user'
                 }
             })
-            .then((err, movies) => {
-                if (err) { res.send(err) }
+            .then((movies) => {
                 res.json(movies);
             });
     },
@@ -68,16 +67,31 @@ module.exports = {
                     model: 'user'
                 }
             })
-            .then((err, movies) => {
-                if (err) { res.send(err) }
+            .then((movies) => {
                 res.json(movies);
+            });
+    },
+    getRelatedMovies(req, res, next) {
+        const { genre } = req.query;
+        const { id } = req.params;
+        const genres = genre[0].split(',')
+        Movie.find({ 'genres': { $in: genres } })
+            .populate({
+                path: 'subscriptions',
+                populate: {
+                    path: 'volunteers',
+                    model: 'user'
+                }
+            })
+            .then((movies) => {
+                const filtered = movies.filter(movie => movie._id.toString() !== id)
+                res.json(filtered);
             });
     },
     createMovie(req, res, next) {
         Movie.create(req.body)
             .then(() => Movie.find({})
-                .then((err, movies) => {
-                    if (err) { res.send(err) }
+                .then((movies) => {
                     res.json(movies);
                 }));
     },
