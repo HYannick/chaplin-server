@@ -75,7 +75,8 @@ module.exports = {
         const { genre } = req.query;
         const { id } = req.params;
         const genres = genre[0].split(',')
-        Movie.find({ 'genres': { $in: genres } })
+        const sliced = genres.slice(0, 2)
+        Movie.find({ 'genres': { $in: sliced } })
             .populate({
                 path: 'subscriptions',
                 populate: {
