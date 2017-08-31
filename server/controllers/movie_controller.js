@@ -8,9 +8,7 @@ const _ = require('lodash');
 
 const sortMovies = (movies, limit, res) => {
     const now = moment().unix();
-    const mapped = movies.filter(movie => {
-        return movie.diffused;
-    }).map(movie => {
+    const mapped = movies.map(movie => {
         return movie.dates
     });
 
