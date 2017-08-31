@@ -5,6 +5,37 @@ const Subscription = require('../models/subscriptions');
 const uploadCtrl = require('./upload_controller');
 const moment = require('moment');
 const _ = require('lodash');
+
+const sortMovies = (movies, limit, res) => {
+    const now = moment().unix();
+    const mapped = movies.filter(movie => {
+        return movie.diffused;
+    }).map(movie => {
+        return movie.dates
+    });
+
+    const filtered = [].concat(...mapped).filter(item => {
+        return moment(item.fullDate).unix() >= now;
+    }).map(item => {
+        const date = moment(item.fullDate).unix();
+        const { time } = item;
+        const data = movies.filter(movie => {
+            return movie.dates.indexOf(item) !== -1;
+        }).map(({ title, _id, cover, desc, imageSet, dates }) => {
+            return { title, _id, cover, imageSet, desc, dates, date, time }
+        });
+
+        const { _id, dates, imageSet, title, cover, desc } = data[0];
+        return { _id, dates, date, time, imageSet, title, cover, desc }
+    });
+
+    const movieList = _.uniqBy(_.sortBy(filtered, ['date']), '_id').slice(0, parseInt(limit));
+    if (movieList.length === movies.length) {
+        res.json({ movieList, max: true });
+    } else {
+        res.json({ movieList });
+    }
+};
 module.exports = {
     getMovie(req, res, next) {
 
@@ -46,55 +77,20 @@ module.exports = {
                 res.json(movies);
             });
     },
+
     getDiffusedMovies(req, res, next) {
         const { limit } = req.query;
         console.log(req.query)
         Movie.find({ 'diffused': true })
             .then((movies) => {
-                const now = moment().unix();
-                const mapped = movies.filter(movie => {
-                    return movie.diffused;
-                }).map(movie => {
-                    return movie.dates
-                });
-
-
-                const filtered = [].concat(...mapped).filter(item => {
-                    return moment(item.fullDate).unix() >= now;
-                }).map(item => {
-                    const date = moment(item.fullDate).unix();
-                    const { time } = item;
-                    const data = movies.filter(movie => {
-                        return movie.dates.indexOf(item) !== -1;
-                    }).map(({ title, _id, cover, desc, imageSet, dates }) => {
-                        return { title, _id, cover, imageSet, desc, dates, date, time }
-                    });
-
-                    const { _id, dates, imageSet, title, cover, desc } = data[0];
-                    return { _id, dates, date, time, imageSet, title, cover, desc }
-                });
-
-                const movieList = _.uniqBy(_.sortBy(filtered, ['date']), '_id').slice(0, parseInt(limit));
-                console.log(movieList.length === movies.length);
-                if (movieList.length === movies.length) {
-                    res.json({ movieList, max: true });
-                } else {
-                    res.json({ movieList });
-                }
-
+                sortMovies(movies, limit, res)
             });
     },
     getUpcomingMovies(req, res, next) {
+        const { limit } = req.query;
         Movie.find({ 'upcoming': true })
-            .populate({
-                path: 'subscriptions',
-                populate: {
-                    path: 'volunteers',
-                    model: 'user'
-                }
-            })
             .then((movies) => {
-                res.json(movies);
+                sortMovies(movies, limit, res)
             });
     },
     getRelatedMovies(req, res, next) {
