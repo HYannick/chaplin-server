@@ -92,4 +92,8 @@ module.exports = (app) => {
     app.delete('/api/announce/:id', AnnounceController.deleteAnnounce);
     app.put('/api/announce/:id', AnnounceController.updateAnnounce);
 
+    // Announces
+    app.get('/api/newsletter/emails', EmailController.getEmails);
+    app.post('/api/newsletter/email/create', EmailController.addEmail);
+    app.delete('/api/newsletter/email/:id', EmailController.RemoveEmail);
 };

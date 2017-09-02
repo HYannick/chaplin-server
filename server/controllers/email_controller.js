@@ -1,7 +1,7 @@
 const nodemailer = require('nodemailer');
 const xoauth2 = require('xoauth2');
 const authConfig = require('../config/mail_config');
-
+const Newsletter = require('../models/newsletter');
 const transporter = nodemailer.createTransport({
     service: "Gmail",
     port: 465,
@@ -10,6 +10,20 @@ const transporter = nodemailer.createTransport({
 });
 
 module.exports = {
+    getEmails(req, res, next) {
+        Newsletter.find({}).then(emails => res.json(emails))
+    },
+    addEmail(req, res, next) {
+        console.log(req.body)
+        Newsletter.create(req.body).then(() => {
+            Newsletter.find({}).then(emails => res.json(emails))
+        })
+    },
+    RemoveEmail(req, res, next) {
+        Newsletter.findOneAndRemove({ _id: req.params.id }).then(() => {
+            Newsletter.find({}).then(emails => res.json(emails))
+        })
+    },
     sendEmail(req, res, next) {
         const { to, mail, pass } = req.body;
         const mailOptions = {

@@ -92,7 +92,12 @@ module.exports = {
     removeUser(req, res, next) {
         const { id } = req.params;
         User.findByIdAndRemove({ _id: id })
-            .then((user) => res.json(user));
+            .then(() => {
+                User.find({})
+                    .then(users => {
+                        res.json(users)
+                    });
+            })
     },
 
 
