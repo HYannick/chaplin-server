@@ -14,7 +14,7 @@ const MovieController = require('../controllers/movie_controller');
 const SubscriptionController = require('../controllers/subscription_controller');
 const uploadController = require('../controllers/upload_controller');
 const EmailController = require('../controllers/email_controller');
-
+const AnnounceController = require('../controllers/announce_controller')
 const apiUrls = require('../config/upload_urls');
 
 
@@ -85,5 +85,11 @@ module.exports = (app) => {
     app.post('/api/upload/cover', multer({ storage }).array('cover'), uploadController.uploadCover);
     app.post('/api/upload/images', multer({ storage }).array('images'), uploadController.uploadImageSet);
     app.delete('/api/uploads/:id', uploadController.deleteImages);
+
+    // Announces
+    app.get('/api/announce', AnnounceController.getAnnounce);
+    app.post('/api/announce/create', AnnounceController.postAnnounce);
+    app.delete('/api/announce/:id', AnnounceController.deleteAnnounce);
+    app.put('/api/announce/:id', AnnounceController.updateAnnounce);
 
 };

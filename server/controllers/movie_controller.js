@@ -23,8 +23,10 @@ const sortMovies = (movies, limit, res) => {
             return { title, _id, cover, imageSet, desc, dates, date, time }
         });
 
-        const { _id, dates, imageSet, title, cover, desc } = data[0];
-        return { _id, dates, date, time, imageSet, title, cover, desc }
+        //sort dates
+        data[0].dates = _.sortBy(data[0].dates, ['date'])
+
+        return data[0]
     });
 
     const movieList = _.uniqBy(_.sortBy(filtered, ['date']), '_id').slice(0, parseInt(limit));
@@ -71,7 +73,7 @@ module.exports = {
                 }
             })
             .then((err, movies) => {
-                if (err) { res.send(err) }
+                if (err) { res.send(err); }
                 res.json(movies);
             });
     },
