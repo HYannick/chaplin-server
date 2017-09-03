@@ -14,7 +14,8 @@ const MovieController = require('../controllers/movie_controller');
 const SubscriptionController = require('../controllers/subscription_controller');
 const uploadController = require('../controllers/upload_controller');
 const EmailController = require('../controllers/email_controller');
-const AnnounceController = require('../controllers/announce_controller')
+const AnnounceController = require('../controllers/announce_controller');
+const CharController = require('../controllers/chat_controller');
 const apiUrls = require('../config/upload_urls');
 
 
@@ -96,4 +97,8 @@ module.exports = (app) => {
     app.get('/api/newsletter/emails', EmailController.getEmails);
     app.post('/api/newsletter/email/create', EmailController.addEmail);
     app.delete('/api/newsletter/email/:id', EmailController.RemoveEmail);
+
+    // Chat
+    app.get('/api/chat/messages', CharController.getMessages);
+    app.post('/api/chat/message/create', CharController.postMessage);
 };

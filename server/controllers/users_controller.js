@@ -48,19 +48,21 @@ module.exports = {
             return res.status(422).send({ error: 'You must provide an email and password' })
         }
 
-        User.findOne({ email: email }, function(err, existingUser) {
+        User.findOne({ email: email })
+            .then((err, existingUser) => {
+                if (err) { return next(err) }
+                if (existingUser) {
+                    return res.status(422).send({ error: 'Email is in use' });
+                }
+            });
+
+        User.findOne({ username: username }).then((err, existingUser) => {
             if (err) { return next(err) }
             if (existingUser) {
-                return res.status(422).send({ error: 'Email is in use' });
+                return res.status(422).send({ error: 'Usenrame is in use' });
             }
         });
 
-        User.findOne({ username: username }, function(err, existingUser) {
-            if (err) { return next(err) }
-            if (existingUser) {
-                return res.status(422).send({ error: 'Username is in use' });
-            }
-        });
 
         const user = new User({
             email: email,
@@ -77,7 +79,7 @@ module.exports = {
                 token: generateToken(user),
                 user: userInfo
             });
-        })
+        }).catch(err => res.json(err))
     },
 
     editUser(req, res, next) {

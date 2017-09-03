@@ -8,6 +8,7 @@ const app = express();
 const routes = require('./routes/routes');
 const dbConf = require('./config/database');
 
+
 app.use(cors());
 mongoose.Promise = global.Promise;
 
