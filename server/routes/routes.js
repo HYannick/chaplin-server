@@ -79,6 +79,7 @@ module.exports = (app) => {
 
     // Email Control
     app.post('/api/sendmail', EmailController.sendEmail);
+    app.get('/api/sendmail/verify', EmailController.verifyEmail);
 
 
     // Upload Images Control

@@ -25,7 +25,7 @@ const MovieSchema = new Schema({
     trailer: String,
     diffused: {
         type: Boolean,
-        default: false
+        default: true
     },
     volunteers: [{
         type: Schema.Types.ObjectId,

@@ -23,6 +23,10 @@ const userSchema = new Schema({
         enum: ['reader', 'volunteer', 'moderator', 'admin'],
         default: 'reader'
     },
+    verified: {
+        type: Boolean,
+        default: false
+    },
     enrolled: [{
         type: Schema.Types.ObjectId,
         ref: 'subs'

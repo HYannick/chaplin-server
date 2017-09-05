@@ -2,6 +2,7 @@ const User = require('../models/user');
 const jwt = require('jwt-simple');
 const authConfig = require('../config/auth');
 const Movie = require('../models/movie');
+const send = require('./email_controller');
 
 function generateToken(user) {
     const timestamp = new Date().getTime();
@@ -30,19 +31,22 @@ module.exports = {
     },
 
     signin(req, res, next) {
-        console.log(req.user);
         const userInfo = setUserInfo(req.user);
-        res.send({
-            token: generateToken(userInfo),
-            user: userInfo
+        User.findOne({ _id: userInfo._id }).then((user) => {
+            if (user.verified) {
+                res.send({
+                    token: generateToken(userInfo),
+                    user: userInfo
+                })
+            } else {
+                res.status(403).send({ error: 'Did you validated your account ?' })
+            }
         })
+
     },
 
     signup(req, res, next) {
-        const email = req.body.email;
-        const password = req.body.password;
-        const role = req.body.role;
-        const username = req.body.username;
+        const { email, password, role, username } = req.body;
 
         if (!email || !password) {
             return res.status(422).send({ error: 'You must provide an email and password' })
@@ -75,6 +79,7 @@ module.exports = {
             if (err) { return next(err) }
 
             const userInfo = setUserInfo(user);
+            send.sendEmail(req, res, next)
             res.json({
                 token: generateToken(user),
                 user: userInfo
