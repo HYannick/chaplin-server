@@ -98,35 +98,40 @@ const uploadProcess = {
     deleteFromRequest(files, callback) {
         var i = files.length;
         files.forEach(function(filepath) {
-            if (isProd) {
-                const c = new Client();
-                c.connect(ftpOptions);
-                c.on('ready', function() {
-                    c.list(function(err, list) {
-                        c.delete(`${apiUrls.ftp}/${filepath}`, function(err) {
-                            console.log('deleted');
-                            i--;
-                            c.end();
-                            if (err) {
-                                callback(err);
-                                return;
-                            } else if (i <= 0) {
-                                callback(null);
-                            }
+            if (filepath) {
+                if (isProd) {
+                    const c = new Client();
+                    c.connect(ftpOptions);
+                    c.on('ready', function() {
+                        c.list(function(err, list) {
+                            c.delete(`${apiUrls.ftp}/${filepath}`, function(err) {
+                                console.log('deleted');
+                                i--;
+                                c.end();
+                                if (err) {
+                                    callback(err);
+                                    return;
+                                } else if (i <= 0) {
+                                    callback(null);
+                                }
+                            });
                         });
                     });
-                });
+                } else {
+                    fs.unlink(path.join(`${apiUrls.uploads}/`, filepath), function(err) {
+                        i--;
+                        if (err) {
+                            callback(err);
+                            return;
+                        } else if (i <= 0) {
+                            callback(null);
+                        }
+                    });
+                }
             } else {
-                fs.unlink(path.join(`${apiUrls.uploads}/`, filepath), function(err) {
-                    i--;
-                    if (err) {
-                        callback(err);
-                        return;
-                    } else if (i <= 0) {
-                        callback(null);
-                    }
-                });
+                callback(null);
             }
+
         });
     },
 
