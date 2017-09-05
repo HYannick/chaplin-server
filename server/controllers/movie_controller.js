@@ -122,7 +122,7 @@ module.exports = {
         const { id } = req.params;
         Subscription.find({ movies: { '_id': id } })
             .then((subs) => {
-                legacy = subs.map((sub) => sub._id);
+                const legacy = subs.map((sub) => sub._id);
                 User.update({}, { $pull: { enrolled: { $in: legacy } } }, { multi: true }).then(() => {
                     Subscription.remove({
                         movies: { '_id': id }

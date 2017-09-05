@@ -3,6 +3,7 @@ const jwt = require('jwt-simple');
 const authConfig = require('../config/auth');
 const Movie = require('../models/movie');
 const send = require('./email_controller');
+const Subscription = require('../models/subscriptions');
 
 function generateToken(user) {
     const timestamp = new Date().getTime();
@@ -98,13 +99,24 @@ module.exports = {
 
     removeUser(req, res, next) {
         const { id } = req.params;
-        User.findByIdAndRemove({ _id: id })
-            .then(() => {
-                User.find({})
-                    .then(users => {
-                        res.json(users)
-                    });
-            })
+        Subscription.find({ enrolled: { '_id': id } }).then((subs) => {
+            const legacy = subs.map((sub) => sub._id);
+            Movie.update({}, { $pull: { volunteers: { $in: legacy } } }, { multi: true }).then(() => {
+                Subscription.remove({
+                    enrolled: { '_id': id }
+                }).then(() => {
+                    User.findByIdAndRemove({ _id: id })
+                        .then(() => {
+                            User.find({})
+                                .then(users => {
+                                    res.json(users)
+                                });
+                        })
+                })
+            });
+        });
+        /*
+         */
     },
 
 
