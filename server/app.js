@@ -25,6 +25,7 @@ if (process.env.NODE_ENV === 'development') {
 
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, '/views'));
+app.use('/images', express.static(__dirname + '/static'));
 app.use(bodyParser.json());
 app.use(logger('dev'));
 
