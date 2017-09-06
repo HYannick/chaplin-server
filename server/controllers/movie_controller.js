@@ -33,7 +33,7 @@ const sortMovies = (movies, limit, res) => {
     if (movieList.length === movies.length) {
         res.json({ movieList, max: true });
     } else {
-        res.json({ movieList });
+        res.json({ movieList, max: false });
     }
 };
 module.exports = {

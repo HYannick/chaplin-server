@@ -34,14 +34,14 @@ module.exports = {
             if (req.query.id == rand) {
                 console.log("email is verified");
                 User.update({ email: mailOptions.to }, { verified: true }).then(() => {
-                    res.end("<h1>Email " + mailOptions.to + " is been Successfully verified");
+                    res.end("<h1 style='text-align: center; font-family: monospace, sans-serif; margin: 50px auto;'>Votre email : " + mailOptions.to + " est maintenant vérifié.");
                 })
             } else {
                 console.log("email is not verified");
-                res.end("<h1>Bad Request</h1>");
+                res.end("<h1>Erreur dans la vérification de l'email</h1>");
             }
         } else {
-            res.end("<h1>Request is from unknown source");
+            res.end("<h1>La requête proviens d'une source inconnue</h1>");
         }
     },
     sendEmail(req, res, next) {
@@ -56,12 +56,13 @@ module.exports = {
             to: email,
             subject: `Vos informations`,
             html: `<div class="email__wrapper">
-              <h2>Bienvenue !</h2>
-              <p>Voici vos ID's :</p>
-              <p>Email: ${email}</p>
-              <p>Password: ${password}</p>
-              <p>Avant de vous connecter veuillez confirmer votre adresse email via ce lien : ${link}</p>
-              <p>A bientôt !</p>
+              <h2 style="text-align: center">Bienvenue !</h2>
+              <br>
+              <p style="text-align: center">Voici vos identifiants :</p>
+              <p style="text-align: center">Email : ${email}</p>
+              <p style="text-align: center">Mot de passe : ${password}</p>
+              <p style="text-align: center">Avant de vous connecter veuillez confirmer votre adresse email via ce lien : ${link}</p>
+              <p style="text-align: center">A bientôt !</p>
             </div>`
         }
         transporter.sendMail(mailOptions, function(error, info) {
