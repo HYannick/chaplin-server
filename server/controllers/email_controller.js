@@ -55,15 +55,21 @@ module.exports = {
             from: authConfig.user,
             to: email,
             subject: `Vos informations`,
-            html: `<div class="email__wrapper">
-              <h2 style="text-align: center">Bienvenue !</h2>
+            html: `
+            <div class="email__wrapper" style="max-width: 500px; width: 100%; margin: 0 auto; border: 1px solid #000; padding: 20px;">
+              <h2 style="text-align: center; display: block; background: #000; color: #fff; margin-top: 0; padding: 20px;">Bienvenue parmi nous !</h2>
               <br>
-              <p style="text-align: center">Voici vos identifiants :</p>
-              <p style="text-align: center">Email : ${email}</p>
-              <p style="text-align: center">Mot de passe : ${password}</p>
-              <p style="text-align: center">Avant de vous connecter veuillez confirmer votre adresse email via ce lien : ${link}</p>
-              <p style="text-align: center">A bientôt !</p>
-            </div>`
+              <p>Le cinéma Charlie Chaplin à Montmélian est heureux de vous compter parmi ses membres.
+              <br><br>Afin de vous inscrire à des permanences et d'échanger avec nous sur notre forum, vous aurez besoin des identifiants suivants :</p>
+              <br>
+              <p style="text-align: center"><b>Email</b> : ${email}</p>
+              <p style="text-align: center"><b>Mot de passe</b> : ${password}</p>
+              <br>
+              <p> Pour valider votre inscription, veuillez confirmer votre adresse email en cliquant sur ce lien : <a href="${link}" target="_blank">${link}</a></p>
+              <p>A très bientôt,</p>
+              <p>L'équipe du cinéma Charlie Chaplin</p>
+            </div>
+            `
         }
         transporter.sendMail(mailOptions, function(error, info) {
             if (error) {
