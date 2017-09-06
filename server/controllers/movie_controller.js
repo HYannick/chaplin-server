@@ -6,9 +6,11 @@ const uploadCtrl = require('./upload_controller');
 const moment = require('moment');
 const _ = require('lodash');
 
-const sortMovies = (movies, limit, res) => {
+const sortMovies = (movies, limit, res, isDiffused) => {
     const now = moment().unix();
-    const mapped = movies.map(movie => {
+    const mapped = movies.filter(movie => {
+        return isDiffused ? movie.diffused = true : movie;
+    }).map(movie => {
         return movie.dates
     });
 
@@ -30,6 +32,7 @@ const sortMovies = (movies, limit, res) => {
     });
 
     const movieList = _.uniqBy(_.sortBy(filtered, ['date']), '_id').slice(0, parseInt(limit));
+    console.log(movieList.length === movies.length)
     if (movieList.length === movies.length) {
         res.json({ movieList, max: true });
     } else {
@@ -83,14 +86,14 @@ module.exports = {
         console.log(req.query)
         Movie.find({ 'diffused': true })
             .then((movies) => {
-                sortMovies(movies, limit, res)
+                sortMovies(movies, limit, res, true)
             });
     },
     getUpcomingMovies(req, res, next) {
         const { limit } = req.query;
         Movie.find({ 'upcoming': true })
             .then((movies) => {
-                sortMovies(movies, limit, res)
+                sortMovies(movies, limit, res, false)
             });
     },
     getRelatedMovies(req, res, next) {
