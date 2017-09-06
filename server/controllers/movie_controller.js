@@ -31,9 +31,10 @@ const sortMovies = (movies, limit, res, isDiffused) => {
         return data[0]
     });
 
+    const defaultList = _.uniqBy(_.sortBy(filtered, ['date']), '_id');
     const movieList = _.uniqBy(_.sortBy(filtered, ['date']), '_id').slice(0, parseInt(limit));
 
-    if (movieList.length === mapped.length) {
+    if (movieList.length === defaultList.length) {
         res.json({ movieList, max: true });
     } else {
         res.json({ movieList, max: false });
