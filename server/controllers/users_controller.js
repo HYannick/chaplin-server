@@ -91,10 +91,16 @@ module.exports = {
     editUser(req, res, next) {
         const { id } = req.params;
         const updates = req.body;
-        User.findByIdAndUpdate({ _id: id }, updates)
-            .then(user => user.save())
-            .then(() => User.findOne({ _id: id }))
-            .then((user) => res.json(user));
+        User.findOne({ _id: id })
+            .then(user => {
+                // workaround in order to change password
+                // cf : https://stackoverflow.com/questions/26871720/using-findone-then-save-to-replace-a-document-mongoose
+                for (var id in req.body) {
+                    user[id] = updates[id];
+                }
+                user.save()
+                res.json(user)
+            });
     },
 
     removeUser(req, res, next) {
@@ -112,7 +118,7 @@ module.exports = {
                                     res.json(users)
                                 });
                         })
-                })
+                });
             });
         });
         /*

@@ -36,6 +36,7 @@ const userSchema = new Schema({
 userSchema.pre('save', function(next) {
     const user = this;
     const SALT_FACTOR = 5;
+
     if (!user.isModified('password')) {
         return next();
     }
