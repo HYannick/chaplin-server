@@ -197,7 +197,16 @@ module.exports = {
             } else {
                 likes.push(userId);
             }
-            proposal.save().then(() => res.json({ success: 'You liked it!' }));
+            proposal.save().then(() => {
+                Proposal.find({})
+                    .populate({
+                        path: 'submitter',
+                        model: 'user'
+                    })
+                    .then((proposals) => {
+                        res.json(proposals);
+                    }).catch(err => res.json(err));
+            });
         });
     },
     deleteProposal(req, res, next) {
