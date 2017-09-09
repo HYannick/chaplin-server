@@ -152,13 +152,20 @@ module.exports = {
     updateMovie(req, res, next) {
         const movieId = req.params.id;
         const movieProps = req.body;
-
         Movie.update({ _id: movieId }, movieProps)
-            .then(() => Movie.find({})
-                .then((err, movies) => {
-                    if (err) { res.send(err) }
-                    res.json(movies);
-                }));
+            .then(() => {
+                Subscription.find({ movies: { '_id': movieId } })
+                    .then((subs) => {
+                        const formatDate = movieProps.dates.map(date => {
+                            return moment(date.fullDate).unix().toString()
+                        })
+                        const filterSub = subs.filter(sub => {
+                            return formatDate.indexOf(sub.date) === -1;
+                        }).map(sub => sub.date)
+                        Subscription.remove({ 'date': { $in: filterSub } })
+                            .then(() => res.json({ success: 'subs deleted' }))
+                    })
+            })
     },
 
     getProposal(req, res, next) {
