@@ -214,8 +214,7 @@ module.exports = {
                 _id: req.params.id
             })
             .then(() => Proposal.find({})
-                .then((err, proposals) => {
-                    if (err) { res.send(err) }
+                .then((proposals) => {
                     res.json(proposals);
                 }));
     },
