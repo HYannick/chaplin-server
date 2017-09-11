@@ -17,5 +17,16 @@ const ProposalSchema = new Schema({
     }
 });
 
+ProposalSchema.pre('save', function(next) {
+    const proposal = this;
+
+    if (proposal.isNew) {
+        this.likes.push(this.submitter);
+        next();
+    } else {
+        next();
+    }
+
+});
 const Proposal = mongoose.model('proposals', ProposalSchema);
 module.exports = Proposal;

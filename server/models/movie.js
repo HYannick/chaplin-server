@@ -33,6 +33,17 @@ const MovieSchema = new Schema({
     }],
     rate: Number
 });
+
+MovieSchema.pre('save', function(next) {
+    const movie = this;
+    if (movie.isNew) {
+        movie.diffused = true;
+        next();
+    } else {
+        next();
+    }
+})
+
 const Movie = mongoose.model('movie', MovieSchema);
 
 
