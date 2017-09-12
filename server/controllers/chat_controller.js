@@ -4,9 +4,9 @@ module.exports = {
     initCon(io) {
         {
             console.log('init')
-            var numUsers = 0;
+            const numUsers = [];
             io.on('connection', function(socket) {
-                var addedUser = false;
+                let addedUser = false;
                 // when the client emits 'new message', this listens and executes
                 socket.on('login', function(data) {
                     // we tell the client to execute 'new message'
@@ -46,17 +46,19 @@ module.exports = {
 
                 // when the client emits 'add user', this listens and executes
                 socket.on('add user', function(username) {
+                    console.log('adding')
                     if (addedUser) return;
 
                     // we store the username in the socket session for this client
                     socket.username = username;
-                    ++numUsers;
+                    numUsers.push(socket.username);
+                    console.log(numUsers)
                     addedUser = true;
-                    socket.emit('login', {
+                    socket.emit('newUser', {
                         numUsers: numUsers
                     });
                     // echo globally (all clients) that a person has connected
-                    socket.broadcast.emit('user joined', {
+                    socket.broadcast.emit('userJoined', {
                         username: socket.username,
                         numUsers: numUsers
                     });
@@ -71,18 +73,36 @@ module.exports = {
 
                 // when the client emits 'stop typing', we broadcast it to others
                 socket.on('stop typing', function() {
-                    socket.broadcast.emit('stop typing', {
+                    socket.broadcast.emit('stopTyping', {
                         username: socket.username
                     });
                 });
 
                 // when the user disconnects.. perform this
-                socket.on('disconnect', function() {
+                socket.on('logout', function() {
                     if (addedUser) {
-                        --numUsers;
-
-                        // echo globally that this client has left
-                        socket.broadcast.emit('user left', {
+                        const index = numUsers.indexOf(socket.username);
+                        numUsers.splice(index, 1);
+                        console.log(numUsers)
+                            // echo globally that this client has left
+                        socket.broadcast.emit('userLeft', {
+                            username: socket.username,
+                            numUsers: numUsers
+                        });
+                        addedUser = false;
+                    }
+                });
+                // when the user disconnects.. perform this
+                socket.on('disconnect', function() {
+                    console.log('disconnect')
+                    console.log(addedUser)
+                    if (addedUser) {
+                        console.log('disconnect')
+                        const index = numUsers.indexOf(socket.username);
+                        numUsers.splice(index, 1);
+                        console.log(numUsers)
+                            // echo globally that this client has left
+                        socket.broadcast.emit('userLeft', {
                             username: socket.username,
                             numUsers: numUsers
                         });
