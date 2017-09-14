@@ -3,4 +3,4 @@ module.exports = {
     user: 'ayhofrzkyz',
     password: 'Nodokaki6Kr0Te061290',
     port: '21'
-}
+};
