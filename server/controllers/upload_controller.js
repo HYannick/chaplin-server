@@ -40,7 +40,6 @@ const uploadProcess = {
                             res.json(obj);
                         }
                     })
-
                 });
             });
         });
@@ -70,6 +69,34 @@ const uploadProcess = {
         });
     },
 
+    uploadPDF(req, res) {
+        const obj = { 'pdf': req.files }
+        const { filename } = req.files[0];
+        console.log(filename)
+        if (isProd) {
+            const c = new Client();
+            c.connect(ftpOptions);
+            c.on('ready', function() {
+                c.list(function(err, list) {
+                    c.put(path.join(`${apiUrls.uploadPDF}/`, filename), `${apiUrls.ftpPDF}/${filename}`, function(err) {
+                        console.log('done');
+                        if (err) throw err;
+                        c.end();
+                        fs.readdir(apiUrls.uploadPDF, function(req, files) {
+                            files.forEach(file => {
+                                fs.unlink(path.join(`${apiUrls.uploadPDF}/`, file), function(err) {
+                                    if (err) throw err;
+                                    res.json(obj);
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+        } else {
+            res.json(obj)
+        }
+    },
     uploadCover(req, res) {
         const obj = { 'cover': req.files }
         uploadProcess.processImages(req, res, obj, 60)
@@ -142,6 +169,13 @@ const uploadProcess = {
                 fs.createReadStream(path.join('./server/static/404.png')).pipe(res)
             }).pipe(res);
         }
+    },
+    viewPDF(req, res) {
+        fs.createReadStream(`${apiUrls.uploadPDF}/programme.pdf`).on('error', function(e) {
+            console.log('error', e);
+            fs.createReadStream(path.join('./server/static/404.png')).pipe(res)
+        }).pipe(res);
     }
-}
+};
+
 module.exports = uploadProcess;

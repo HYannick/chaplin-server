@@ -6,10 +6,9 @@ module.exports = {
             .then(announce => res.json(announce))
     },
     postAnnounce(req, res, next) {
-        Announce.remove({})
+        Announce.update({}, req.body)
             .then(() => {
-                Announce.create(req.body)
-                    .then(announce => res.json(announce))
+                res.json({ succss: 'updated' })
             })
 
     },

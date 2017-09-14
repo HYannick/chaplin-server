@@ -25,9 +25,26 @@ const storage = multer.diskStorage({
         cb(null, apiUrls.uploads)
     },
     filename: function(req, file, cb) {
-        console.log(file);
         if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
             cb(null, file.originalname);
+        }
+    }
+});
+
+const storagePDF = multer.diskStorage({
+    destination: function(req, file, cb) {
+        cb(null, apiUrls.uploadPDF)
+    },
+    filename: function(req, file, cb) {
+        if (file.mimetype === 'application/pdf') {
+            fs.readdir(apiUrls.uploadPDF, function(req, files) {
+                files.forEach(file => {
+                    fs.unlink(path.join(`${apiUrls.uploadPDF}/`, file), function(err) {
+                        if (err) throw err;
+                    });
+                });
+                cb(null, 'programme.pdf');
+            });
         }
     }
 });
@@ -84,8 +101,10 @@ module.exports = (app) => {
 
     // Upload Images Control
     app.get('/api/uploads/:id', uploadController.viewImage);
+    app.get('/api/program', uploadController.viewPDF);
     app.post('/api/upload/cover', multer({ storage }).array('cover'), uploadController.uploadCover);
     app.post('/api/upload/images', multer({ storage }).array('images'), uploadController.uploadImageSet);
+    app.post('/api/upload/pdf', multer({ storage: storagePDF }).array('pdf'), uploadController.uploadPDF);
     app.delete('/api/uploads/:id', uploadController.deleteImages);
 
     // Announces
