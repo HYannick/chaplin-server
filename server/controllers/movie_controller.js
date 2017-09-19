@@ -84,7 +84,7 @@ module.exports = {
 
     getDiffusedMovies(req, res, next) {
         const { limit } = req.query;
-        console.log(req.query)
+
         Movie.find({ 'diffused': true })
             .then((movies) => {
                 sortMovies(movies, limit, res, true)
@@ -140,7 +140,9 @@ module.exports = {
                                     Movie.remove({
                                             _id: req.params.id
                                         })
-                                        .then(() => res.json({ success: 'film deleted' }));
+                                        .then(() => {
+                                            Movie.find({}).then(movies => res.json(movies))
+                                        })
                                 }
                             })
                         })
