@@ -11,7 +11,7 @@ const sortMovies = (movies, limit, res, isDiffused) => {
     const mapped = movies.filter(movie => {
         return isDiffused ? movie.diffused = true : movie;
     }).map(movie => {
-        return movie.dates
+        return movie.dates;
     });
 
     const filtered = [].concat(...mapped).filter(item => {
