@@ -59,8 +59,10 @@ module.exports = {
                 User.update({ email: req.query.mail }, { verified: true }).then(() => {
                     res.end("<h1 style='text-align: center; font-family: monospace, sans-serif; margin: 50px auto;'>Votre email (" + req.query.mail + ") est maintenant v&eacute;rifi&eacute;.");
                     rand.splice(rand.indexOf(parseInt(req.query.id)), 1);
+                    console.log(rand)
                 })
             } else {
+                console.log(rand)
                 console.log("email is not verified");
                 res.end("<h1>Erreur dans la v&eacute;rification de l'email</h1>");
             }
