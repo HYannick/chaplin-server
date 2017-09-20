@@ -30,7 +30,8 @@ const generateMailTpl = (email, password, link) => {
     </div>
     `
 }
-let rand, host, link, mailOptions;
+let nFloat, rand = [],
+    host, link, mailOptions;
 
 module.exports = {
     getEmails(req, res, next) {
@@ -52,30 +53,34 @@ module.exports = {
         console.log("http://" + host)
         if ((req.protocol + "://" + req.get('host')) == ("http://" + host)) {
             console.log("Domain is matched. Information is from Authentic email");
-            if (req.query.id == rand) {
+            if (rand.includes(parseInt(req.query.id))) {
                 console.log("email is verified");
-                User.update({ email: mailOptions.to }, { verified: true }).then(() => {
-                    res.end("<h1 style='text-align: center; font-family: monospace, sans-serif; margin: 50px auto;'>Votre email : " + mailOptions.to + " est maintenant v&eacute;rifi&eacute;.");
+                console.log(req.query.mail)
+                User.update({ email: req.query.mail }, { verified: true }).then(() => {
+                    res.end("<h1 style='text-align: center; font-family: monospace, sans-serif; margin: 50px auto;'>Votre email (" + req.query.mail + ") est maintenant v&eacute;rifi&eacute;.");
+                    rand.splice(rand.indexOf(parseInt(req.query.id)), 1);
                 })
             } else {
                 console.log("email is not verified");
                 res.end("<h1>Erreur dans la v&eacute;rification de l'email</h1>");
             }
         } else {
-            res.end("<h1  style='text-align: center; font-family: monospace, sans-serif; margin: 50px auto;'>La requ&ecirc;te proviens d'une source inconnue</h1>");
+            res.end("<h1  style='text-align: center; font-family: monospace, sans-serif; margin: 50px auto;'>La requ&ecirc;te provient d'une source inconnue</h1>");
         }
     },
     sendEmail(req, res, next) {
         const { email, password } = req.body;
-        rand = Math.floor((Math.random() * 100) + 54);
+        num = Math.floor((Math.random() * 100) + 13659);
+        rand.push(num)
         host = req.get('host');
-        link = `http://${req.get('host')}/api/sendmail/verify?id=${rand}`;
+        link = `http://${req.get('host')}/api/sendmail/verify?id=${num}&mail=${email}`;
         mailOptions = {
             from: authConfig.user,
             to: email,
             subject: `Vos informations`,
             html: generateMailTpl(email, password, link)
         }
+
         transporter.sendMail(mailOptions, function(error, info) {
             if (error) {
                 console.log(error);
