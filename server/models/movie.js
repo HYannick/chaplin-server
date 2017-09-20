@@ -6,6 +6,7 @@ const MovieSchema = new Schema({
         required: true,
     },
     information: String,
+    disclaimer: String,
     synopsis: String,
     cover: String,
     language: String,

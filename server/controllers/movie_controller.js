@@ -21,8 +21,8 @@ const sortMovies = (movies, limit, res, isDiffused) => {
         const { time } = item;
         const data = movies.filter(movie => {
             return movie.dates.indexOf(item) !== -1;
-        }).map(({ title, _id, cover, desc, imageSet, dates }) => {
-            return { title, _id, cover, imageSet, desc, dates, date, time }
+        }).map(({ title, _id, cover, desc, imageSet, dates, information, disclaimer }) => {
+            return { title, _id, cover, imageSet, desc, dates, date, time, information, disclaimer }
         });
 
         //sort dates
