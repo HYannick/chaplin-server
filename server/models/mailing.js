@@ -1,12 +1,9 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const MailingListSchema = new Schema({
-    codes: Array,
+    code: Number,
+    email: String
 });
 const MailingList = mongoose.model('mailinglist', MailingListSchema);
 
-
-
-
-
-module.exports = ChatMsg;
+module.exports = MailingList;

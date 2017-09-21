@@ -3,6 +3,7 @@ const xoauth2 = require('xoauth2');
 const authConfig = require('../config/mail_config');
 const Newsletter = require('../models/newsletter');
 const User = require('../models/user');
+const MailingList = require('../models/mailing');
 const transporter = nodemailer.createTransport({
     service: "Gmail",
     port: 465,
@@ -53,29 +54,30 @@ module.exports = {
         console.log("http://" + host)
         if ((req.protocol + "://" + req.get('host')) == ("http://" + host)) {
             console.log("Domain is matched. Information is from Authentic email");
-            if (rand.includes(parseInt(req.query.id))) {
-                console.log("email is verified");
-                console.log(req.query.mail)
-                User.update({ email: req.query.mail }, { verified: true }).then(() => {
-                    res.end("<h1 style='text-align: center; font-family: monospace, sans-serif; margin: 50px auto;'>Votre email (" + req.query.mail + ") est maintenant v&eacute;rifi&eacute;.");
-                    rand.splice(rand.indexOf(parseInt(req.query.id)), 1);
+            MailingList.findOne({ code: req.query.id }).then((code) => {
+                if (code) {
+                    console.log("email is verified");
+                    User.update({ email: req.query.mail }, { verified: true }).then(() => {
+                        MailingList.remove({ email: req.query.mail, code: req.query.id }).then(() => {
+                            res.end("<h1 style='text-align: center; font-family: monospace, sans-serif; margin: 50px auto;'>Votre email (" + req.query.mail + ") est maintenant v&eacute;rifi&eacute;.");
+                        })
+                    })
+                } else {
                     console.log(rand)
-                })
-            } else {
-                console.log(rand)
-                console.log("email is not verified");
-                res.end("<h1>Erreur dans la v&eacute;rification de l'email</h1>");
-            }
+                    console.log("email is not verified");
+                    res.end("<h1>Erreur dans la v&eacute;rification de l'email</h1>");
+                }
+            });
         } else {
             res.end("<h1  style='text-align: center; font-family: monospace, sans-serif; margin: 50px auto;'>La requ&ecirc;te provient d'une source inconnue</h1>");
         }
     },
     sendEmail(req, res, next) {
         const { email, password } = req.body;
-        num = Math.floor((Math.random() * 100) + 13659);
-        rand.push(num)
+        code = Math.floor((Math.random() * 100) + 13659);
+        rand.push(code)
         host = req.get('host');
-        link = `http://${req.get('host')}/api/sendmail/verify?id=${num}&mail=${email}`;
+        link = `http://${req.get('host')}/api/sendmail/verify?id=${code}&mail=${email}`;
         mailOptions = {
             from: authConfig.user,
             to: email,
@@ -88,7 +90,9 @@ module.exports = {
                 console.log(error);
             } else {
                 console.log('Email sent: ' + info.response);
-                res.json({ success: 'successfully sent!' });
+                MailingList.create({ email, code }).then(() => {
+                    res.json({ success: 'successfully sent!' });
+                })
             }
         });
     }
