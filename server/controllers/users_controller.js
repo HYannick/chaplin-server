@@ -4,6 +4,7 @@ const authConfig = require('../config/auth');
 const Movie = require('../models/movie');
 const send = require('./email_controller');
 const Subscription = require('../models/subscriptions');
+const Proposal = require('../models/proposal');
 
 function generateToken(user) {
     const timestamp = new Date().getTime();
@@ -91,6 +92,7 @@ module.exports = {
     editUser(req, res, next) {
         const { id } = req.params;
         const updates = req.body;
+        console.log(updates)
         User.findOne({ _id: id })
             .then(user => {
                 // workaround in order to change password
@@ -111,13 +113,16 @@ module.exports = {
                 Subscription.remove({
                     enrolled: { '_id': id }
                 }).then(() => {
-                    User.findByIdAndRemove({ _id: id })
-                        .then(() => {
-                            User.find({})
-                                .then(users => {
-                                    res.json(users)
-                                });
-                        })
+                    Proposal.remove({ submitter: { _id: id } }).then(() => {
+                        User.findByIdAndRemove({ _id: id })
+                            .then(() => {
+                                User.find({})
+                                    .then(users => {
+                                        res.json(users)
+                                    });
+                            })
+                    })
+
                 });
             });
         });
