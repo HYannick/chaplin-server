@@ -1,9 +1,9 @@
 const nodemailer = require('nodemailer');
 const xoauth2 = require('xoauth2');
+const jwt = require('jwt-simple');
 const authConfig = require('../config/mail_config');
 const Newsletter = require('../models/newsletter');
 const User = require('../models/user');
-const MailingList = require('../models/mailing');
 const transporter = nodemailer.createTransport({
     service: "Gmail",
     port: 465,
@@ -32,7 +32,7 @@ const generateMailTpl = (email, password, link) => {
     `
 }
 let nFloat, rand = [],
-    host, link, mailOptions;
+    host, mailOptions;
 
 module.exports = {
     getEmails(req, res, next) {
@@ -50,34 +50,38 @@ module.exports = {
         })
     },
     verifyEmail(req, res, next) {
-        console.log(req.protocol + ":/" + req.get('host'));
-        console.log("http://" + host)
-        if ((req.protocol + "://" + req.get('host')) == ("http://" + host)) {
-            console.log("Domain is matched. Information is from Authentic email");
-            MailingList.findOne({ code: req.query.id }).then((code) => {
-                if (code) {
-                    console.log("email is verified");
-                    User.update({ email: req.query.mail }, { verified: true }).then(() => {
-                        MailingList.remove({ email: req.query.mail, code: req.query.id }).then(() => {
-                            res.end("<h1 style='text-align: center; font-family: monospace, sans-serif; margin: 50px auto;'>Votre email (" + req.query.mail + ") est maintenant v&eacute;rifi&eacute;.");
+        const data = jwt.decode(req.query.id, authConfig.clientSecret);
+        if (new Date(data.expiry) > new Date()) {
+            if ((req.protocol + "://" + req.get('host')) == ("http://" + host)) {
+                console.log("Domain is matched. Information is from Authentic email");
+                User.findOne({ _id: data.user._id }).then((user) => {
+                    if (user) {
+                        console.log("email is verified");
+                        User.update({ _id: data.user._id }, { verified: true }).then(() => {
+                            res.end("<h1 style='text-align: center; font-family: monospace, sans-serif; margin: 50px auto;'>Votre email (" + data.user.email + ") est maintenant v&eacute;rifi&eacute;.");
                         })
-                    })
-                } else {
-                    console.log(rand)
-                    console.log("email is not verified");
-                    res.end("<h1>Erreur dans la v&eacute;rification de l'email</h1>");
-                }
-            });
+                    } else {
+                        console.log("email is not verified");
+                        res.end("<h1>Erreur dans la v&eacute;rification de l'email</h1>");
+                    }
+                });
+            } else {
+                res.end("<h1  style='text-align: center; font-family: monospace, sans-serif; margin: 50px auto;'>La requ&ecirc;te provient d'une source inconnue</h1>");
+            }
         } else {
-            res.end("<h1  style='text-align: center; font-family: monospace, sans-serif; margin: 50px auto;'>La requ&ecirc;te provient d'une source inconnue</h1>");
+            res.end('Lien expiré')
         }
+
     },
-    sendEmail(req, res, next) {
-        const { email, password } = req.body;
-        code = Math.floor((Math.random() * 100) + 13659);
-        rand.push(code)
+    sendEmail(req, res, next, user) {
         host = req.get('host');
-        link = `http://${req.get('host')}/api/sendmail/verify?id=${code}&mail=${email}`;
+        const { email, password } = req.body;
+        const userInfos = {};
+        userInfos.user = user;
+        userInfos.expiry = new Date(new Date().getTime() + 72 * 60 * 60 * 1000);
+        const token = jwt.encode(userInfos, authConfig.clientSecret);
+        const link = `http://${req.get('host')}/api/sendmail/verify?id=${token}`;
+
         mailOptions = {
             from: authConfig.user,
             to: email,
@@ -90,9 +94,6 @@ module.exports = {
                 console.log(error);
             } else {
                 console.log('Email sent: ' + info.response);
-                MailingList.create({ email, code }).then(() => {
-                    res.json({ success: 'successfully sent!' });
-                })
             }
         });
     }

@@ -80,7 +80,7 @@ module.exports = {
             if (err) { return next(err) }
 
             const userInfo = setUserInfo(user);
-            send.sendEmail(req, res, next)
+            send.sendEmail(req, res, next, userInfo)
             res.json({
                 token: generateToken(user),
                 user: userInfo
