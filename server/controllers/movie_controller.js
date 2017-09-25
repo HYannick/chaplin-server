@@ -98,18 +98,12 @@ module.exports = {
             });
     },
     getRelatedMovies(req, res, next) {
+        const now = moment().unix();
         const { genre } = req.query;
         const { id } = req.params;
         const genres = genre[0].split(',')
         const sliced = genres.slice(0, 2)
-        Movie.find({ 'genres': { $in: sliced } })
-            .populate({
-                path: 'subscriptions',
-                populate: {
-                    path: 'volunteers',
-                    model: 'user'
-                }
-            })
+        Movie.find({ 'genres': { $in: sliced }, 'diffused': true })
             .then((movies) => {
                 const filtered = movies.filter(movie => movie._id.toString() !== id)
                 res.json(filtered);
