@@ -176,6 +176,10 @@ module.exports = {
                 path: 'submitter',
                 model: 'user'
             })
+            .populate({
+                path: 'likes',
+                model: 'user'
+            })
             .then((proposals) => {
                 res.json(proposals);
             }).catch(err => res.json(err));
@@ -203,6 +207,10 @@ module.exports = {
                 Proposal.find({})
                     .populate({
                         path: 'submitter',
+                        model: 'user'
+                    })
+                    .populate({
+                        path: 'likes',
                         model: 'user'
                     })
                     .then((proposals) => {
