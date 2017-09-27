@@ -59,7 +59,6 @@ module.exports = {
     },
     getMovieByTitle(req, res, next) {
         const { title } = req.query;
-        console.log(title)
         Movie.find({ $text: { $search: title } })
             .then(movie => {
                 res.json(movie);
@@ -115,6 +114,30 @@ module.exports = {
                 .then((movies) => {
                     res.json(movies);
                 }));
+    },
+    getFilteredMovies(req,res,next){
+        const queryString = req.query;
+        const { genres, diffused, upcoming, language } = req.query;
+        const genresList = genres[0].split(',')
+        const obj = {
+            genres : {$in: genresList},
+            diffused,
+            upcoming,
+            language
+        }
+        const query = _.reduce(obj, (result, value, key) => {
+            if(value){
+                result[key] = value;
+                console.log(result)
+                return result;
+            }
+        }, {})
+
+        console.log(query)
+
+        Movie.find(query).then(movies => {
+            res.json({movies: _.orderBy(movies, ['title'])});
+        })
     },
     deleteMovie(req, res, next) {
         const { id } = req.params;

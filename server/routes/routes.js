@@ -77,6 +77,7 @@ module.exports = (app) => {
     app.post('/api/movies/create', requireAuth, MovieController.createMovie);
     app.put('/api/movies/:id', requireAuth, MovieController.updateMovie);
     app.delete('/api/movies/:id', requireAuth, MovieController.deleteMovie);
+    app.get('/api/search', MovieController.getFilteredMovies);
 
     // Proposals Control
     app.get('/api/proposals', MovieController.getProposal);
@@ -93,6 +94,7 @@ module.exports = (app) => {
     app.post('/api/subscribe', SubscriptionController.subscribe);
     app.delete('/api/subscribe/:id', SubscriptionController.unsubscribe);
     app.post('/api/subscriptions/delete', SubscriptionController.deleteSubscriptions);
+
 
     // Email Control
     app.post('/api/sendmail', EmailController.sendEmail);
