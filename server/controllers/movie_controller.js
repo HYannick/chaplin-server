@@ -268,7 +268,7 @@ module.exports = {
         genres : pushDatas(container.find('.blue-link span[itemprop="genre"]')),
         authors : pushDatas(container.find('.blue-link span[itemprop="name"]')),
         actors: pushDatas(container.find('.meta-body .meta-body-item').eq(2).find('.blue-link'), true),
-        nationality : container.find('.nationality').text().trim(),
+        language : container.find('.nationality').text().trim(),
         synopsis : $('.synopsis-txt').text().trim()
       });
     });
