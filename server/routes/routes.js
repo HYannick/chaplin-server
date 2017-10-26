@@ -78,6 +78,7 @@ module.exports = (app) => {
     app.put('/api/movies/:id', requireAuth, MovieController.updateMovie);
     app.delete('/api/movies/:id', requireAuth, MovieController.deleteMovie);
     app.get('/api/search', MovieController.getFilteredMovies);
+    app.post('/api/scrapbooking', MovieController.getScrapbookedContent)
 
     // Proposals Control
     app.get('/api/proposals', MovieController.getProposal);

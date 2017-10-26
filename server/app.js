@@ -11,8 +11,7 @@ const dbConf = require('./config/database');
 
 app.use(cors());
 mongoose.Promise = global.Promise;
-
-if (process.env.NODE_ENV == "test") {
+if (process.env.NODE_ENV === "test") {
     mongoose.connect(dbConf.testDB);
 }
 if (process.env.NODE_ENV === 'production') {
@@ -20,6 +19,7 @@ if (process.env.NODE_ENV === 'production') {
     mongoose.connect(dbConf.prod);
 }
 if (process.env.NODE_ENV === 'development') {
+    console.log('dev');
     mongoose.connect(dbConf.dev, { config: { autoIndex: false } });
 }
 
