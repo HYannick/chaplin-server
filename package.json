@@ -8,7 +8,7 @@
     "start": "NODE_ENV='production' node index.js",
     "all": "concurrently \" npm run back\" \"npm run front\"",
     "front": "cd ../sheep-chap && npm run dev",
-    "back": "NODE_ENV='development' nodemon index.js",
+    "dev": "NODE_ENV='development' nodemon index.js",
     "test": "NODE_ENV='test' nodemon --exec mocha --recursive -R min"
   },
   "author": "",
@@ -16,6 +16,7 @@
   "dependencies": {
     "bcrypt-nodejs": "0.0.3",
     "body-parser": "^1.17.1",
+    "cloudinary": "^1.10.0",
     "concurrently": "^3.5.0",
     "cors": "^2.8.3",
     "cross-env": "^5.0.1",
