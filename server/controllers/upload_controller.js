@@ -72,7 +72,7 @@ const uploadProcess = {
     const obj = {'pdf': req.files}
     const {filename} = req.files[0];
     console.log(filename)
-    if (true) {
+    if (isProd) {
       const c = new Client();
       c.connect(ftpOptions);
       c.on('ready', function () {
@@ -109,7 +109,7 @@ const uploadProcess = {
   deleteImages(req, res, next) {
     const {id} = req.params;
     console.log('deleting')
-    if (true) {
+    if (isProd) {
       uploadProcess.deleteFromFTP(res, id);
     } else {
       fs.unlink(path.join(`${apiUrls.uploads}/`, id), function (err) {
@@ -125,7 +125,7 @@ const uploadProcess = {
     var i = files.length;
     files.forEach((filepath) => {
       if (filepath) {
-        if (true) {
+        if (isProd) {
           const filename = filepath.id || filepath
           console.log(filename)
           Cloudinary.v2.uploader.destroy(filename, function(err, result) {
