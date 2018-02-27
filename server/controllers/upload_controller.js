@@ -23,7 +23,7 @@ const uploadProcess = {
       image
         .quality(rendering) // set JPEG quality
         .write(path.join(`${apiUrls.uploads}/` + filename)); // save
-      (isProd) ? uploadProcess.uploadToFTP(filename, res, obj) : res.json(obj);
+      (true) ? uploadProcess.uploadToFTP(filename, res, obj) : res.json(obj);
     }).catch(function (err) {
       console.error(err);
     });
@@ -49,8 +49,9 @@ const uploadProcess = {
   },
 
   deleteFromFTP(res, filename) {
-    Cloudinary.v2.uploader.destroy(`${apiUrls.ftp}/${filename}`, function(err, result) {
+    Cloudinary.v2.uploader.destroy(filename, function(err, result) {
       if (err) {
+        console.log(err)
         res.status(503).json({error: 'deleted'})
       }
 
@@ -71,7 +72,7 @@ const uploadProcess = {
     const obj = {'pdf': req.files}
     const {filename} = req.files[0];
     console.log(filename)
-    if (isProd) {
+    if (true) {
       const c = new Client();
       c.connect(ftpOptions);
       c.on('ready', function () {
@@ -108,7 +109,7 @@ const uploadProcess = {
   deleteImages(req, res, next) {
     const {id} = req.params;
     console.log('deleting')
-    if (isProd) {
+    if (true) {
       uploadProcess.deleteFromFTP(res, id);
     } else {
       fs.unlink(path.join(`${apiUrls.uploads}/`, id), function (err) {
@@ -122,26 +123,20 @@ const uploadProcess = {
   // CF : https://stackoverflow.com/questions/14295878/delete-several-files-in-node-js
   deleteFromRequest(files, callback) {
     var i = files.length;
-    files.forEach(function (filepath) {
+    files.forEach((filepath) => {
       if (filepath) {
-        if (isProd) {
-          const c = new Client();
-          c.connect(ftpOptions);
-          c.on('ready', function () {
-            c.list(function (err, list) {
-              c.delete(`${apiUrls.ftp}/${filepath}`, function (err) {
-                console.log('deleted');
-                i--;
-                c.end();
-                if (err) {
-                  callback(err);
-                  return;
-                } else if (i <= 0) {
-                  callback(null);
-                }
-              });
-            });
-          });
+        if (true) {
+          const filename = filepath.id || filepath
+          console.log(filename)
+          Cloudinary.v2.uploader.destroy(filename, function(err, result) {
+            console.log(result)
+            i--;
+            if (err) {
+              callback(err);
+            } else if (i <= 0) {
+              callback(null);
+            }
+          })
         } else {
           fs.unlink(path.join(`${apiUrls.uploads}/`, filepath), function (err) {
             i--;
@@ -161,7 +156,7 @@ const uploadProcess = {
   },
 
   viewImage(req, res) {
-    if (req.params.id != 'undefined') {
+    if (req.params.id !== 'undefined') {
       fs.createReadStream(path.join(`${apiUrls.uploads}/`, req.params.id)).on('error', function (e) {
         console.log('error', e);
         fs.createReadStream(path.join('./server/static/404.png')).pipe(res)
