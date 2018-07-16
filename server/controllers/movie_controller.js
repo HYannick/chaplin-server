@@ -262,6 +262,7 @@ module.exports = {
         if(isActors) arr.pop()
         return arr;
       }
+      console.log( $('.content-txt').text().trim())
       res.json({
         title: $('.titlebar-title-lg').text().trim(),
         releaseDate: container.find('.date').text().trim(),
@@ -269,7 +270,7 @@ module.exports = {
         authors : pushDatas(container.find('.blue-link span[itemprop="name"]')),
         actors: pushDatas(container.find('.meta-body .meta-body-item').eq(2).find('.blue-link'), true),
         language : container.find('.nationality').text().trim(),
-        synopsis : $('.synopsis-txt').text().trim()
+        synopsis : $('.content-txt').text().trim()
       });
     });
 

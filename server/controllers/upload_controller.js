@@ -3,7 +3,6 @@ const Client = require('ftp');
 const path = require('path');
 const ftpOptions = require('../config/ftp');
 const apiUrls = require('../config/upload_urls');
-const multer = require('multer');
 const Jimp = require("jimp");
 const isProd = process.env.NODE_ENV === 'production';
 

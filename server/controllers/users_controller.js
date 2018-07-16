@@ -65,7 +65,7 @@ module.exports = {
         User.findOne({ username: username }).then((err, existingUser) => {
             if (err) { return next(err) }
             if (existingUser) {
-                return res.status(422).send({ error: 'Usenrame is in use' });
+                return res.status(422).send({ error: 'Username is in use' });
             }
         });
 
