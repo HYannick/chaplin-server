@@ -104,6 +104,7 @@ module.exports = (app) => {
 
     // Upload Images Control
     app.get('/api/upload', requireAuth, uploadController.getSignedUrl);
+    app.post('/api/upload/delete', requireAuth, uploadController.deletePreviews);
 
     // Announces
     app.get('/api/announce', AnnounceController.getAnnounce);
