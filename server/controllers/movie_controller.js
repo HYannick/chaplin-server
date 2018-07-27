@@ -43,9 +43,7 @@ const sortMovies = (movies, limit, res, isDiffused) => {
 };
 module.exports = {
   getMovie(req, res, next) {
-
     const {id} = req.params;
-
     Movie.findOne({_id: id})
       .populate({
         path: 'subscriptions',
@@ -151,19 +149,12 @@ module.exports = {
           Subscription.remove({
             movies: {'_id': id}
           }).then(() => {
-            Movie.findOne({'_id': id}).then(movie => {
+            Movie.findOne({'_id': id}).then(async movie => {
               movie.imageSet.push(movie.cover)
-              uploadCtrl.deleteFromRequest(movie.imageSet, function (err) {
-                if (err) {
-                  console.log(err);
-                } else {
-                  Movie.remove({
-                    _id: req.params.id
-                  })
-                    .then(() => {
-                      Movie.find({}).then(movies => res.json(movies))
-                    })
-                }
+              uploadCtrl.deleteImgSet(movie.imageSet, () => {
+                Movie.remove({_id: req.params.id})
+                .then(() => Movie.find({})
+                  .then(movies => res.json(movies)))
               })
             })
 
@@ -248,29 +239,31 @@ module.exports = {
           res.json(proposals);
         }));
   },
-  getScrapbookedContent(req,res,next) {
-    scrap(req.body, function(err, $) {
-      if(err) {
+  getScrapbookedContent(req, res, next) {
+    scrap(req.body, function (err, $) {
+      if (err) {
         throw err;
       }
       const container = $('.card-movie-overview');
-      function pushDatas ($elem, isActors) {
+
+      function pushDatas($elem, isActors) {
         const arr = [];
         _.forEach($elem, (item) => {
           arr.push($(item).text())
         });
-        if(isActors) arr.pop()
+        if (isActors) arr.pop()
         return arr;
       }
-      console.log( $('.content-txt').text().trim())
+
+      console.log($('.content-txt').text().trim())
       res.json({
         title: $('.titlebar-title-lg').text().trim(),
         releaseDate: container.find('.date').text().trim(),
-        genres : pushDatas(container.find('.blue-link span[itemprop="genre"]')),
-        authors : pushDatas(container.find('.blue-link span[itemprop="name"]')),
+        genres: pushDatas(container.find('.blue-link span[itemprop="genre"]')),
+        authors: pushDatas(container.find('.blue-link span[itemprop="name"]')),
         actors: pushDatas(container.find('.meta-body .meta-body-item').eq(2).find('.blue-link'), true),
-        language : container.find('.nationality').text().trim(),
-        synopsis : $('.content-txt').text().trim()
+        language: container.find('.nationality').text().trim(),
+        synopsis: $('.content-txt').text().trim()
       });
     });
 

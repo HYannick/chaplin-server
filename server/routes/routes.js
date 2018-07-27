@@ -103,12 +103,7 @@ module.exports = (app) => {
 
 
     // Upload Images Control
-    app.get('/api/uploads/:id', uploadController.viewImage);
-    app.get('/api/program', uploadController.viewPDF);
-    app.post('/api/upload/cover', multer({ storage }).array('cover'), uploadController.uploadCover);
-    app.post('/api/upload/images', multer({ storage }).array('images'), uploadController.uploadImageSet);
-    app.post('/api/upload/pdf', multer({ storage: storagePDF }).array('pdf'), uploadController.uploadPDF);
-    app.delete('/api/uploads/:id', uploadController.deleteImages);
+    app.get('/api/upload', requireAuth, uploadController.getSignedUrl);
 
     // Announces
     app.get('/api/announce', AnnounceController.getAnnounce);
