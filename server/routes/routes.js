@@ -1,10 +1,5 @@
-const fs = require('fs');
-const path = require('path');
-const multer = require('multer');
-
 //Passport config
 const passport = require('passport');
-const passportService = require('../config/passport');
 const requireAuth = passport.authenticate('jwt', { session: false });
 const requireSignin = passport.authenticate('local', { session: false });
 
@@ -16,38 +11,6 @@ const uploadController = require('../controllers/upload_controller');
 const EmailController = require('../controllers/email_controller');
 const AnnounceController = require('../controllers/announce_controller');
 const ChatController = require('../controllers/chat_controller');
-const apiUrls = require('../config/upload_urls');
-
-
-// Multer Storage config
-const storage = multer.diskStorage({
-    destination: function(req, file, cb) {
-        cb(null, apiUrls.uploads)
-    },
-    filename: function(req, file, cb) {
-        if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
-            cb(null, file.originalname);
-        }
-    }
-});
-
-const storagePDF = multer.diskStorage({
-    destination: function(req, file, cb) {
-        cb(null, apiUrls.uploadPDF)
-    },
-    filename: function(req, file, cb) {
-        if (file.mimetype === 'application/pdf') {
-            fs.readdir(apiUrls.uploadPDF, function(req, files) {
-                files.forEach(file => {
-                    fs.unlink(path.join(`${apiUrls.uploadPDF}/`, file), function(err) {
-                        if (err) throw err;
-                    });
-                });
-                cb(null, 'programme.pdf');
-            });
-        }
-    }
-});
 
 
 module.exports = (app) => {
