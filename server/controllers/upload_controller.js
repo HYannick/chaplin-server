@@ -27,10 +27,22 @@ function deleteImgSet(imgSet, cb) {
 }
 
 const uploadProcess = {
-  async deletePreviews(req, res) {
-    deleteImgSet(req.body, () => res.json({success: 'file s deleted'}))
+  deleteImgSet(imgSet, cb) {
+    const params = {
+      Bucket: s3_bucket,
+      Delete: {
+        Objects: imgSet.map(img => ({Key: img})),
+        Quiet: false
+      }
+    };
+    s3.deleteObjects(params, (err, data) => {
+      if (err) console.log(err, err.stack);
+      else return cb();
+    });
   },
-
+  async deletePreviews(req, res) {
+    deleteImgSet(req.body, () => res.json({success: 'files deleted'}))
+  },
   async getSignedUrl(req, res) {
     const key = `${uuid()}.jpg`
     const signedUrl = await s3.getSignedUrlPromise('putObject', {
