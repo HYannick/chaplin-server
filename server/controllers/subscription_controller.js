@@ -131,7 +131,6 @@ module.exports = {
 
     deleteSubscriptions(req, res, next) {
         const { legacySubs } = req.body;
-        console.log(legacySubs)
         Subscription.remove({
                 _id: { '$in': legacySubs }
             })

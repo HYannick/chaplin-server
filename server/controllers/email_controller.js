@@ -1,5 +1,4 @@
 const nodemailer = require('nodemailer');
-const xoauth2 = require('xoauth2');
 const jwt = require('jwt-simple');
 const authConfig = require('../config/mail_config');
 const Newsletter = require('../models/newsletter');
@@ -39,7 +38,6 @@ module.exports = {
         Newsletter.find({}).then(emails => res.json(emails))
     },
     addEmail(req, res, next) {
-        console.log(req.body)
         Newsletter.create(req.body).then(() => {
             Newsletter.find({}).then(emails => res.json(emails))
         })

@@ -13,6 +13,9 @@ AWS.S3.prototype.getSignedUrlPromise = function (operation, params) {
 }
 
 function deleteImgSet(imgSet, cb) {
+  if(!imgSet) {
+    return cb();
+  }
   const params = {
     Bucket: s3_bucket,
     Delete: {
@@ -41,7 +44,10 @@ const uploadProcess = {
     });
   },
   async deletePreviews(req, res) {
-    deleteImgSet(req.body, () => res.json({success: 'files deleted'}))
+    if(req.body.length) {
+      deleteImgSet(req.body, () => res.json({success: 'files deleted'}))
+    }
+    res.json({success: 'No files to delete'})
   },
   async getSignedUrl(req, res) {
     const key = `${uuid()}.jpg`

@@ -129,12 +129,10 @@ module.exports = {
     const query = _.reduce(obj, (result, value, key) => {
       if (value) {
         result[key] = value;
-        console.log(result)
         return result;
       }
     }, {})
 
-    console.log(query)
 
     Movie.find(query).then(movies => {
       res.json({movies: _.orderBy(movies, ['title'])});
@@ -255,7 +253,6 @@ module.exports = {
         return arr;
       }
 
-      console.log($('.content-txt').text().trim())
       res.json({
         title: $('.titlebar-title-lg').text().trim(),
         releaseDate: container.find('.date').text().trim(),
