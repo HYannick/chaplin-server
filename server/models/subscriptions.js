@@ -11,7 +11,7 @@ const SubscriptionSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'movie'
     }]
-});
+}, {usePushEach: true});
 
 const Subscription = mongoose.model('subs', SubscriptionSchema);
 

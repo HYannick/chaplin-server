@@ -31,7 +31,7 @@ const userSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'subs'
     }]
-});
+}, {usePushEach: true});
 
 userSchema.pre('save', function(next) {
     const user = this;
