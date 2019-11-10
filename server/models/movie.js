@@ -33,7 +33,7 @@ const MovieSchema = new Schema({
         ref: 'subs'
     }],
     rate: Number
-});
+}, {usePushEach: true});
 
 MovieSchema.pre('save', function(next) {
     const movie = this;
