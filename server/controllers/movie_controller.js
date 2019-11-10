@@ -242,7 +242,7 @@ module.exports = {
       if (err) {
         throw err;
       }
-      const container = $('.card-movie-overview');
+      const container = $('.movie-card-overview');
 
       function pushDatas($elem, isActors) {
         const arr = [];
@@ -252,15 +252,15 @@ module.exports = {
         if (isActors) arr.pop()
         return arr;
       }
-
       res.json({
         title: $('.titlebar-title-lg').text().trim(),
+        duration: container.find('.meta-body .meta-body-item').eq(0).clone().remove('span').text().trim().replace(/[{()}]/g, ''),
         releaseDate: container.find('.date').text().trim(),
-        genres: pushDatas(container.find('.blue-link span[itemprop="genre"]')),
-        authors: pushDatas(container.find('.blue-link span[itemprop="name"]')),
+        genres: pushDatas(container.find('.meta-body .meta-body-item').eq(3).find('.blue-link')),
+        authors: pushDatas(container.find('.meta-body .meta-body-item').eq(1).find('.blue-link')),
         actors: pushDatas(container.find('.meta-body .meta-body-item').eq(2).find('.blue-link'), true),
         language: container.find('.nationality').text().trim(),
-        synopsis: $('.content-txt').text().trim()
+        synopsis: $('#synopsis-details .content-txt').text().trim()
       });
     });
 
