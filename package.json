@@ -37,7 +37,7 @@
     "passport-local": "^1.0.0",
     "pug": "^2.0.0-rc.2",
     "scrap": "^0.1.0",
-    "socket.io": "^2.0.3",
+    "socket.io": "^2.4.0",
     "supertest": "^3.0.0",
     "uuid": "^3.3.2",
     "xoauth2": "^1.2.0"
